@@ -18,6 +18,7 @@ using System.Windows.Media.Animation;
 using System.Management;
 using Spectabis_WPF.Domain;
 using System.Runtime.InteropServices;
+using Spectabis_WPF.View_Models;
 
 namespace Spectabis_WPF.Views
 {
@@ -58,6 +59,8 @@ namespace Spectabis_WPF.Views
 
         //PCSX2 Process
         private Process PCSX = new Process();
+
+        public LibraryListGameViewModel Game { get; set; }
 
         public Library()
         {
@@ -614,6 +617,8 @@ namespace Spectabis_WPF.Views
         //Create a new game tile in gamePanel
         public void CreateTile(string game)
         {
+            Game = new LibraryListGameViewModel(game);
+
             Image boxArt = CreateBoxArtResource($"resources\\configs\\{game}");
             boxArt.Tag = game;
 

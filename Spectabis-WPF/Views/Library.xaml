@@ -3,6 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	  xmlns:local="clr-namespace:Spectabis_WPF.Views"
       mc:Ignorable="d" 
       d:DesignHeight="300" d:DesignWidth="300"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
@@ -35,11 +36,15 @@
 
         <Label x:Name="NoGameLabel" Margin="0,50" VerticalAlignment="Top" HorizontalAlignment="Center" Content="To add a game, just drag and drop file here!" FontSize="20" Foreground="DarkGray"/>
 
-        <ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False">
+		
+
+		<ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False">
             <WrapPanel x:Name="gamePanel" HorizontalAlignment="Left" Margin="10,76,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5"/>
         </ScrollViewer>
 
-        <StackPanel x:Name="SearchPanel" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,10">
+		
+
+		<StackPanel x:Name="SearchPanel" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,10">
             <materialDesign:PackIcon Width="25" Height="25" Kind="magnify" VerticalAlignment="Center"/>
             <TextBox VerticalAlignment="Center" x:Name="SearchBar" materialDesign:HintAssist.Hint="Search library" Width="200" KeyDown="SearchBar_KeyDown" GotFocus="SearchBar_GotFocus" />
         </StackPanel>
@@ -62,7 +67,7 @@
         </materialDesign:PopupBox>
 
         <materialDesign:Snackbar MessageQueue="{materialDesign:MessageQueue}" x:Name="SnackBar"/>
-        
-        
-    </Grid>
+
+		
+	</Grid>
 </Page>

@@ -218,6 +218,16 @@ namespace Spectabis_WPF.Views
 
         }
 
+        private void Menu_LibraryList_Click(object sender, RoutedEventArgs e)
+        {
+            mainFrame.Source = new Uri("LibraryList.xaml", UriKind.Relative);
+            MainWindow_Header.Text = "Library List";
+            Overlay(false);
+
+            Console.WriteLine(this.Width + " x " + this.Height);
+
+        }
+
         //Menu - Settings Button
         private void Menu_Settings_Click(object sender, RoutedEventArgs e)
         {
