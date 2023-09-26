@@ -106,6 +106,12 @@ namespace Spectabis_WPF.Views
 
             //Set appropriate menu icon for global controller settings
             setGlobalControllerIcon(Properties.Settings.Default.globalController);
+
+            gameList.Visibility = Visibility.Visible;
+            gameGrid.Visibility = Visibility.Collapsed;
+
+            GridViewBtn.IsEnabled = true;
+            ListViewBtn.IsEnabled = false;
         }
 
         private void CheckForUpdates()
@@ -1380,11 +1386,11 @@ namespace Spectabis_WPF.Views
         {
             if (e == true)
             {
-                PopupStackPanel.Visibility = Visibility.Visible;
+                //PopupStackPanel.Visibility = Visibility.Visible;
             }
             else
             {
-                PopupStackPanel.Visibility = Visibility.Collapsed;
+                //PopupStackPanel.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -1538,5 +1544,23 @@ namespace Spectabis_WPF.Views
                 if (elementWithFocus.MoveFocus(request)) e.Handled = true;
             }
         }
-    }
+
+		private void GridView_Click(object sender, RoutedEventArgs e)
+		{
+            gameList.Visibility = Visibility.Collapsed;
+            gameGrid.Visibility = Visibility.Visible;
+
+            GridViewBtn.IsEnabled = false;
+            ListViewBtn.IsEnabled = true;
+		}
+
+		private void ListView_Click(object sender, RoutedEventArgs e)
+		{
+            gameList.Visibility = Visibility.Visible;
+            gameGrid.Visibility = Visibility.Collapsed;
+
+            GridViewBtn.IsEnabled = true;
+            ListViewBtn.IsEnabled = false;
+        }
+	}
 }

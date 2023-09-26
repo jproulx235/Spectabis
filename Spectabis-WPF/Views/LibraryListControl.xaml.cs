@@ -19,14 +19,13 @@ using System.Windows.Shapes;
 namespace Spectabis_WPF.Views
 {
 	/// <summary>
-	/// Interaction logic for LibraryList.xaml
+	/// Interaction logic for LibraryListControl.xaml
 	/// </summary>
-	public partial class LibraryList : Page
+	public partial class LibraryListControl : UserControl
 	{
 		public List<LibraryListGameViewModel> Games { get; set; } = new List<LibraryListGameViewModel>();
-		public LibraryListGameViewModel Game { get; set; }
 		public Process PCSX = new Process();
-		public LibraryList()
+		public LibraryListControl()
 		{
 			var dir = App.BaseDirectory + @"\resources\configs\";
 
@@ -36,10 +35,10 @@ namespace Spectabis_WPF.Views
 			foreach (string game in _gamesdir)
 			{
 				string _gameName = game.Remove(0, game.LastIndexOf(System.IO.Path.DirectorySeparatorChar) + 1);
-				Games.Add(new LibraryListGameViewModel(_gameName, this));
-			}
 
-			Game = Games.First();
+				if (File.Exists(game + @"\Spectabis.ini"))
+					Games.Add(new LibraryListGameViewModel(_gameName, this));
+			}
 
 			InitializeComponent();
 

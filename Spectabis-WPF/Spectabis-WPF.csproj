@@ -312,11 +312,8 @@
     <Compile Include="Views\GameDiscovery.xaml.cs">
       <DependentUpon>GameDiscovery.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\LibraryList.xaml.cs">
-      <DependentUpon>LibraryList.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\LibraryListGame.xaml.cs">
-      <DependentUpon>LibraryListGame.xaml</DependentUpon>
+    <Compile Include="Views\LibraryListControl.xaml.cs">
+      <DependentUpon>LibraryListControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
@@ -344,11 +341,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\LibraryList.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\LibraryListGame.xaml">
+    <Page Include="Views\LibraryListControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
