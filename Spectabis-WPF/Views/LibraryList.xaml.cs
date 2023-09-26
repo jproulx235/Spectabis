@@ -1,6 +1,7 @@
 ﻿using Spectabis_WPF.View_Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -24,6 +25,7 @@ namespace Spectabis_WPF.Views
 	{
 		public List<LibraryListGameViewModel> Games { get; set; } = new List<LibraryListGameViewModel>();
 		public LibraryListGameViewModel Game { get; set; }
+		public Process PCSX = new Process();
 		public LibraryList()
 		{
 			var dir = App.BaseDirectory + @"\resources\configs\";
@@ -34,12 +36,27 @@ namespace Spectabis_WPF.Views
 			foreach (string game in _gamesdir)
 			{
 				string _gameName = game.Remove(0, game.LastIndexOf(System.IO.Path.DirectorySeparatorChar) + 1);
-				Games.Add(new LibraryListGameViewModel(_gameName));
+				Games.Add(new LibraryListGameViewModel(_gameName, this));
 			}
 
 			Game = Games.First();
 
 			InitializeComponent();
+
+			this.DataContext = this;
+		}
+
+		public void ForceStop()
+		{
+			try
+			{
+				PCSX.Kill();
+				Task.Run(new Action(() => ((MainWindow)Application.Current.MainWindow).BlockInput(false)));
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+			}
 		}
 	}
 }

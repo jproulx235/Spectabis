@@ -29,45 +29,57 @@
         </ResourceDictionary>
     </Page.Resources>
 
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="50"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
 
+		<StackPanel Grid.Row="0" Orientation="Horizontal">
+			<StackPanel x:Name="SearchPanel" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,10">
+				<materialDesign:PackIcon Width="25" Height="25" Kind="magnify" VerticalAlignment="Center"/>
+				<TextBox VerticalAlignment="Center" x:Name="SearchBar" materialDesign:HintAssist.Hint="Search library" Width="200" KeyDown="SearchBar_KeyDown" GotFocus="SearchBar_GotFocus" />
+			</StackPanel>
+			<Button ToolTip="Add Directory" Click="Directory_Click" Focusable="False" Margin="0,0,10,0">
+				<materialDesign:PackIcon Kind="Folder" Height="20" Width="20" Focusable="False"/>
+			</Button>
 
-    <Grid>
-        <Label x:Name="ControllerStatus" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="5,2" FontFamily="Roboto" Foreground="Gray" Opacity="0"/>
+			<Button x:Name="GlobalController_Button" ToolTip="Enable Global Controller Settings" MouseRightButtonDown="GlobalController_RightClick" Click="GlobalController_Click" Focusable="False" Margin="0,0,10,0">
+				<materialDesign:PackIcon x:Name="GlobalController_Icon" Kind="XboxControllerOff" Height="20" Width="20" Focusable="False"/>
+			</Button>
 
-        <Label x:Name="NoGameLabel" Margin="0,50" VerticalAlignment="Top" HorizontalAlignment="Center" Content="To add a game, just drag and drop file here!" FontSize="20" Foreground="DarkGray"/>
-
+			<Button ToolTip="Add Game" Click="PlusButton_Click" Focusable="False">
+				<materialDesign:PackIcon Kind="Playstation" Height="20" Width="20" Focusable="False"/>
+			</Button>
+		</StackPanel>
 		
 
-		<ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False">
-            <WrapPanel x:Name="gamePanel" HorizontalAlignment="Left" Margin="10,76,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5"/>
-        </ScrollViewer>
+		<Grid Grid.Row="1">
+			<Label x:Name="ControllerStatus" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="5,2" FontFamily="Roboto" Foreground="Gray" Opacity="0"/>
 
-		
+			<Label x:Name="NoGameLabel" Margin="0,50" VerticalAlignment="Top" HorizontalAlignment="Center" Content="To add a game, just drag and drop file here!" FontSize="20" Foreground="DarkGray"/>
 
-		<StackPanel x:Name="SearchPanel" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,10">
-            <materialDesign:PackIcon Width="25" Height="25" Kind="magnify" VerticalAlignment="Center"/>
-            <TextBox VerticalAlignment="Center" x:Name="SearchBar" materialDesign:HintAssist.Hint="Search library" Width="200" KeyDown="SearchBar_KeyDown" GotFocus="SearchBar_GotFocus" />
-        </StackPanel>
+			<ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False">
+				<WrapPanel x:Name="gamePanel" HorizontalAlignment="Left" Margin="10,76,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5"/>
+			</ScrollViewer>
 
+			<materialDesign:PopupBox PopupMode="MouseOver" Style="{StaticResource MaterialDesignMultiFloatingActionPopupBox}" Margin="0,0,50,100" Width="56" Height="56" HorizontalAlignment="Right" VerticalAlignment="Bottom" Focusable="False">
+				<StackPanel Orientation="Vertical" Focusable="False" Visibility="Collapsed" x:Name="PopupStackPanel">
+					<!--<Button ToolTip="Add Directory" Click="Directory_Click" Focusable="False">
+						<materialDesign:PackIcon Kind="Folder" Height="20" Width="20" Focusable="False"/>
+					</Button>
 
-        <materialDesign:PopupBox PopupMode="MouseOver" Style="{StaticResource MaterialDesignMultiFloatingActionPopupBox}" Margin="0,0,50,100" Width="56" Height="56" HorizontalAlignment="Right" VerticalAlignment="Bottom" Focusable="False">
-            <StackPanel Orientation="Vertical" Focusable="False" Visibility="Collapsed" x:Name="PopupStackPanel">
-                <Button ToolTip="Add Directory" Click="Directory_Click" Focusable="False">
-                    <materialDesign:PackIcon Kind="Folder" Height="20" Width="20" Focusable="False"/>
-                </Button>
+					<Button x:Name="GlobalController_Button" ToolTip="Enable Global Controller Settings" MouseRightButtonDown="GlobalController_RightClick" Click="GlobalController_Click" Focusable="False">
+						<materialDesign:PackIcon x:Name="GlobalController_Icon" Kind="XboxControllerOff" Height="20" Width="20" Focusable="False"/>
+					</Button>
 
-                <Button x:Name="GlobalController_Button" ToolTip="Enable Global Controller Settings" MouseRightButtonDown="GlobalController_RightClick" Click="GlobalController_Click" Focusable="False">
-                    <materialDesign:PackIcon x:Name="GlobalController_Icon" Kind="XboxControllerOff" Height="20" Width="20" Focusable="False"/>
-                </Button>
+					<Button ToolTip="Add Game" Click="PlusButton_Click" Focusable="False">
+						<materialDesign:PackIcon Kind="Playstation" Height="20" Width="20" Focusable="False"/>
+					</Button>-->
+				</StackPanel>
+			</materialDesign:PopupBox>
 
-                <Button ToolTip="Add Game" Click="PlusButton_Click" Focusable="False">
-                    <materialDesign:PackIcon Kind="Playstation" Height="20" Width="20" Focusable="False"/>
-                </Button>
-            </StackPanel>
-        </materialDesign:PopupBox>
-
-        <materialDesign:Snackbar MessageQueue="{materialDesign:MessageQueue}" x:Name="SnackBar"/>
-
-		
+			<materialDesign:Snackbar MessageQueue="{materialDesign:MessageQueue}" x:Name="SnackBar"/>
+		</Grid>
 	</Grid>
 </Page>

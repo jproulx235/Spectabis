@@ -617,8 +617,6 @@ namespace Spectabis_WPF.Views
         //Create a new game tile in gamePanel
         public void CreateTile(string game)
         {
-            Game = new LibraryListGameViewModel(game);
-
             Image boxArt = CreateBoxArtResource($"resources\\configs\\{game}");
             boxArt.Tag = game;
 

@@ -1010,7 +1010,7 @@ namespace Spectabis_WPF.Views
         //Force Stop PCSX2 button
         private void ForceStop_Click(object sender, RoutedEventArgs e)
         {
-            Dispatcher.Invoke(new Action(() => ((Library)mainFrame.Content).ForceStop()));
+            Dispatcher.Invoke(new Action(() => ((LibraryList)mainFrame.Content).ForceStop()));
         }
 
         private void AprilFools_Button(object sender, RoutedEventArgs e)

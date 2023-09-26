@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Spectabis_WPF.Views"
 			 xmlns:vm="clr-namespace:Spectabis_WPF.View_Models"
+			 xmlns:fa="http://schemas.fontawesome.com/icons/svg"
              mc:Ignorable="d">
 	<Grid Height="100">
 		<Grid.ColumnDefinitions>
@@ -19,5 +20,9 @@
 		<TextBlock Grid.Column="1" Text="{Binding Path=GameName}"></TextBlock>
 
 		<TextBlock Grid.Column="2" Text="{Binding Path=PlaytimeMinutes}"></TextBlock>
+
+		<Button Grid.Column="3" Click="Button_Click" Width="50" Height="50">
+			<fa:ImageAwesome Icon="Solid_Play"></fa:ImageAwesome>
+		</Button>
 	</Grid>
 </UserControl>
