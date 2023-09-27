@@ -299,7 +299,8 @@
     <Compile Include="Domain\SupportedGames.cs" />
     <Compile Include="Domain\UpdateCheck.cs" />
     <Compile Include="Properties\Settings.cs" />
-    <Compile Include="View Models\LibraryListGameViewModel.cs" />
+    <Compile Include="ViewModels\LibraryGameViewModel.cs" />
+    <Compile Include="ViewModels\LibraryViewModel.cs" />
     <Compile Include="Views\AddGame.xaml.cs">
       <DependentUpon>AddGame.xaml</DependentUpon>
     </Compile>

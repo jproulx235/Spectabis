@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.PlatformUI;
+﻿using MaterialDesignThemes.Wpf;
+using Microsoft.VisualStudio.PlatformUI;
 using Spectabis_WPF.Domain;
 using Spectabis_WPF.Views;
 using System;
@@ -13,15 +14,17 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace Spectabis_WPF.View_Models
+namespace Spectabis_WPF.ViewModels
 {
-	public class LibraryListGameViewModel : INotifyPropertyChanged
+	public class LibraryGameViewModel : INotifyPropertyChanged
 	{
 		private string gameConfigs = App.BaseDirectory + @"\resources\configs\";
 
 		private LibraryListControl list;
+		private LibraryViewModel library;
 
 
 		private string gameName;
@@ -143,7 +146,18 @@ namespace Spectabis_WPF.View_Models
 			}
 		}
 
-		public LibraryListGameViewModel(string gameName, LibraryListControl list)
+		private SolidColorBrush _primaryColor;
+		public SolidColorBrush PrimaryColor
+		{
+			get => _primaryColor;
+			set
+			{
+				_primaryColor = value;
+				OnPropertyChanged(nameof(PrimaryColor));
+			}
+		}
+
+		public LibraryGameViewModel(string gameName, LibraryListControl list)
 		{
 			this.list = list;
 			GameName = gameName;
@@ -157,6 +171,28 @@ namespace Spectabis_WPF.View_Models
 			}
 
 			refreshArt();
+		}
+
+		public LibraryGameViewModel(string gameName, LibraryViewModel library)
+		{
+			this.library = library;
+			GameName = gameName;
+
+			if (Properties.Settings.Default.playtime == true)
+			{
+				IniFile spectabis = new IniFile($"{gameConfigs}//{gameName}//spectabis.ini");
+				string minutes = spectabis.Read("playtime", "Spectabis");
+
+				PlaytimeMinutes = minutes != "" ? Convert.ToInt32(minutes) : 0;
+			}
+
+			refreshArt();
+
+			PaletteHelper PaletteQuery = new PaletteHelper();
+			Palette currentPalette = PaletteQuery.QueryPalette();
+			SolidColorBrush brush = new SolidColorBrush(currentPalette.PrimarySwatch.PrimaryHues.ElementAt(7).Color);
+			var overlay = Color.FromArgb(127, brush.Color.R, brush.Color.G, brush.Color.B);
+			PrimaryColor = new SolidColorBrush(overlay);
 		}
 
 		private void refreshArt()
@@ -180,7 +216,7 @@ namespace Spectabis_WPF.View_Models
 			Application.Current.Dispatcher.Invoke(() => BoxArt = art);
 		}
 
-		public LibraryListGameViewModel()
+		public LibraryGameViewModel()
 		{ }
 
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -195,11 +231,23 @@ namespace Spectabis_WPF.View_Models
 			Console.WriteLine($"CopyGlobalProfile({GameName})");
 			GameProfile.CopyGlobalProfile(GameName);
 
-			list.PCSX = LaunchPCSX2.CreateGameProcess(GameName);
-			list.PCSX.EnableRaisingEvents = true;
-			list.PCSX.Exited += new EventHandler(PCSX_Exited);
+			if(list != null)
+			{
+				list.PCSX = LaunchPCSX2.CreateGameProcess(GameName);
+				list.PCSX.EnableRaisingEvents = true;
+				list.PCSX.Exited += new EventHandler(PCSX_Exited);
 
-			list.PCSX.Start();
+				list.PCSX.Start();
+			}
+			else if(library != null)
+			{
+				library.PCSX = LaunchPCSX2.CreateGameProcess(GameName);
+				library.PCSX.EnableRaisingEvents = true;
+				library.PCSX.Exited += new EventHandler(PCSX_Exited);
+
+				library.PCSX.Start();
+			}
+			
 
 			//Minimize Window
 			Application.Current.Dispatcher.Invoke(new Action(() => ((MainWindow)Application.Current.MainWindow).MainWindow_Minimize()));
@@ -241,7 +289,10 @@ namespace Spectabis_WPF.View_Models
 			IniFile SpectabisINI = new IniFile(gameConfigs + @"\" + GameName + @"\spectabis.ini");
 			AddToBlacklist(SpectabisINI.Read("isoDirectory", "Spectabis"));
 
-			list.Games.Remove(this);
+			if (list != null)
+				list.Games.Remove(this);
+			else if (library != null)
+				library.Games.Remove(this);
 
 			//Delete profile folder
 			if (Directory.Exists(gameConfigs + @"/" + GameName))

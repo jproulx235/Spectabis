@@ -4,8 +4,9 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	  xmlns:local="clr-namespace:Spectabis_WPF.Views"
+	  xmlns:fa="http://schemas.fontawesome.com/icons/svg"
       mc:Ignorable="d" 
-      d:DesignHeight="300" d:DesignWidth="300"
+      d:DesignHeight="300" d:DesignWidth="800"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Medium"
@@ -14,21 +15,6 @@
         FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto"
          DragOver="Grid_DragOver" Drop="Grid_Drop" AllowDrop="True"
         Title="Library">
-
-    <Page.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <!--<ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.CheckBox.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ListBox.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.PopupBox.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.RadioButton.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.TextBlock.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ToggleButton.xaml" />-->
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </Page.Resources>
-
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="50"/>
@@ -48,24 +34,24 @@
 			</StackPanel>
 
 			<StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
-				<Button ToolTip="Add Directory" Click="Directory_Click" Focusable="False" Margin="0,0,10,0">
+				<Button Command="{Binding Path=DirectoryCommand}" ToolTip="Add Directory" Focusable="False" Margin="0,0,10,0">
 					<materialDesign:PackIcon Kind="Folder" Height="20" Width="20" Focusable="False"/>
 				</Button>
 
-				<Button x:Name="GlobalController_Button" ToolTip="Enable Global Controller Settings" MouseRightButtonDown="GlobalController_RightClick" Click="GlobalController_Click" Focusable="False" Margin="0,0,10,0">
-					<materialDesign:PackIcon x:Name="GlobalController_Icon" Kind="XboxControllerOff" Height="20" Width="20" Focusable="False"/>
+				<Button x:Name="GlobalController_Button" Command="{Binding Path=ControllerCommand}" ToolTip="{Binding Path=GlobalControllerTooltip}" MouseRightButtonDown="GlobalController_Button_MouseRightButtonDown" Focusable="False" Margin="0,0,10,0">
+					<materialDesign:PackIcon x:Name="GlobalController_Icon" Kind="{Binding Path=GlobalControllerIcon}" Height="20" Width="20" Focusable="False"/>
 				</Button>
 
-				<Button ToolTip="Add Game" Click="PlusButton_Click" Focusable="False">
+				<Button Command="{Binding Path=AddGameCommand}" ToolTip="Add Game" Focusable="False">
 					<materialDesign:PackIcon Kind="Playstation" Height="20" Width="20" Focusable="False"/>
 				</Button>
 			</StackPanel>
 
 			<StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0">
-				<Button x:Name="GridViewBtn" Click="GridView_Click" Margin="0,0,10,0">
+				<Button x:Name="GridViewBtn" Command="{Binding Path=GridViewCommand}" Margin="0,0,10,0" IsEnabled="{Binding Path=GridButtonEnabled}">
 					<materialDesign:PackIcon Kind="Grid" Height="20" Width="20" Focusable="False"/>
 				</Button>
-				<Button x:Name="ListViewBtn" Click="ListView_Click">
+				<Button x:Name="ListViewBtn" Command="{Binding Path=ListViewCommand}" IsEnabled="{Binding Path=ListButtonEnabled}">
 					<materialDesign:PackIcon Kind="FormatListBulleted" Height="20" Width="20" Focusable="False"/>
 				</Button>
 			</StackPanel>
@@ -74,14 +60,207 @@
 		<Grid Grid.Row="1">
 			<Label x:Name="ControllerStatus" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="5,2" FontFamily="Roboto" Foreground="Gray" Opacity="0"/>
 
-			<Label x:Name="NoGameLabel" Margin="0,50" VerticalAlignment="Top" HorizontalAlignment="Center" Content="To add a game, just drag and drop file here!" FontSize="20" Foreground="DarkGray"/>
+			<Label x:Name="NoGameLabel" Margin="0,50" VerticalAlignment="Top" HorizontalAlignment="Center" Content="To add a game, just drag and drop file here!" FontSize="20" Foreground="DarkGray"
+				   Visibility="{Binding Path=NoGameVisibility}"/>
 
-			<ScrollViewer x:Name="gameGrid" VerticalScrollBarVisibility="Auto" Focusable="False">
-				<WrapPanel x:Name="gamePanel" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5"/>
+			<ScrollViewer x:Name="gameGrid" VerticalScrollBarVisibility="Auto" Focusable="False" Visibility="{Binding Path=GameGridVisibility}">
+				<ListBox ItemsSource="{Binding Path=Games}" HorizontalAlignment="Stretch">
+					<ListBox.ItemsPanel>
+						<ItemsPanelTemplate>
+							<WrapPanel Orientation="Horizontal" Margin="10,30,0,0" VerticalAlignment="Top"/>
+						</ItemsPanelTemplate>
+					</ListBox.ItemsPanel>
+					<ListBox.Template>
+						<ControlTemplate>
+							<Grid HorizontalAlignment="Stretch">
+								<ItemsPresenter/>
+							</Grid>
+						</ControlTemplate>
+					</ListBox.Template>
+					<ListBox.ItemContainerStyle>
+						<Style TargetType="ListBoxItem">
+							<Setter Property="HorizontalAlignment" Value="Stretch"></Setter>
+							<Setter Property="Template">
+								<Setter.Value>
+									<ControlTemplate TargetType="ListBoxItem">
+										<ContentPresenter/>
+									</ControlTemplate>
+								</Setter.Value>
+							</Setter>
+						</Style>
+					</ListBox.ItemContainerStyle>
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<Grid x:Name="grid" Width="150" Height="200" Margin="3" MouseEnter="grid_MouseEnter" MouseLeave="grid_MouseLeave" Tag="{Binding Path=GameName}">
+								
+								<Image Source="{Binding Path=BoxArt}" HorizontalAlignment="Center" Width="150"/>
+
+								<Border Name="border" Background="{Binding Path=PrimaryColor}" Visibility="Collapsed">
+									<Grid>
+										<Grid.RowDefinitions>
+											<RowDefinition Height="25"/>
+											<RowDefinition Height="*"/>
+											<RowDefinition Height="45"/>
+										</Grid.RowDefinitions>
+										
+										<TextBlock Grid.Row="0" Text="{Binding Path=Playtime}" Width="150" FontFamily="Roboto Light" FontSize="16" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Top" 
+											   TextAlignment="Center" TextWrapping="Wrap" Margin="0,5,0,0"/>
+
+										<StackPanel Grid.Row="1" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
+											<Button Command="{Binding Path=ConfigPcsx2Command}" ToolTip="Play Game" Width="125" Height="20" Margin="0,0,0,0" Padding="0">
+												<StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+													<fa:ImageAwesome Icon="Solid_Play" Height="12" Width="12" PrimaryColor="White" Margin="0,0,2,0"/>
+													<TextBlock Text="Play Game" FontSize="10"/>
+												</StackPanel>
+											</Button>
+											<Button Command="{Binding Path=ConfigPcsx2Command}" ToolTip="Configure in PCSX2" Width="125" Height="20" Margin="0,5,0,0" Padding="0">
+												<StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+													<fa:ImageAwesome Icon="Brands_Playstation" Height="12" Width="12" PrimaryColor="White" Margin="0,0,2,0"/>
+													<TextBlock Text="Configure in PCSX2" FontSize="10"/>
+												</StackPanel>
+											</Button>
+											<Button Command="{Binding Path=RefetchCommand}" ToolTip="Refetch Box Art" Width="125" Height="20" Margin="0,5,0,0">
+												<StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+													<fa:ImageAwesome Icon="Solid_ArrowRotateLeft" Height="12" Width="12" PrimaryColor="White" Margin="0,0,2,0"/>
+													<TextBlock Text="Refetch Box Art" FontSize="10"/>
+												</StackPanel>
+											</Button>
+											<Button Command="{Binding Path=ConfigCommand}" ToolTip="Game Configuration" Width="125" Height="20" Margin="0,5,0,0">
+												<StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+													<fa:ImageAwesome Icon="Solid_Gear" Height="12" Width="12" PrimaryColor="White" Margin="0,0,2,0"/>
+													<TextBlock Text="Game Config" FontSize="10"/>
+												</StackPanel>
+											</Button>
+											<Button Command="{Binding Path=RemoveCommand}" ToolTip="Remove Game" Width="125" Height="20" Margin="0,5,0,0">
+												<StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+													<fa:ImageAwesome Icon="Solid_Trash" Height="12" Width="12" PrimaryColor="White" Margin="0,0,2,0"/>
+													<TextBlock Text="Remove Game" FontSize="10"/>
+												</StackPanel>
+											</Button>
+										</StackPanel>
+
+										<TextBlock Grid.Row="2" Text="{Binding Path=GameName}" Width="140" MaxHeight="45" FontFamily="Roboto Light" FontSize="16" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Bottom" 
+											   TextAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"  Margin="5,0,5,5"/>
+									</Grid>
+								</Border>
+							</Grid>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
 			</ScrollViewer>
 
-			<ScrollViewer x:Name="gameList" VerticalScrollBarVisibility="Auto" Focusable="False">
-				<local:LibraryListControl></local:LibraryListControl>
+			<ScrollViewer x:Name="gameList" VerticalScrollBarVisibility="Auto" Focusable="False" Visibility="{Binding Path=GameListVisibility}">
+				<StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+					<Grid Height="30" Margin="5">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="100"/>
+							<ColumnDefinition Width="8*"/>
+							<ColumnDefinition Width="*"/>
+							<ColumnDefinition Width="1.5*"/>
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Grid.Column="1" Text="Name" FontSize="18" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+						<TextBlock Grid.Column="2" Text="Time Played" FontSize="18" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+						<TextBlock Grid.Column="3" Text=""/>
+					</Grid>
+
+					<ListBox ItemsSource="{Binding Path=Games}" HorizontalAlignment="Stretch">
+						<ListBox.Template>
+							<ControlTemplate>
+								<Grid HorizontalAlignment="Stretch">
+									<ItemsPresenter/>
+								</Grid>
+							</ControlTemplate>
+						</ListBox.Template>
+						<ListBox.ItemContainerStyle>
+							<Style TargetType="ListBoxItem">
+								<Setter Property="HorizontalAlignment" Value="Stretch"></Setter>
+								<Setter Property="Template">
+									<Setter.Value>
+										<ControlTemplate TargetType="ListBoxItem">
+											<ContentPresenter/>
+										</ControlTemplate>
+									</Setter.Value>
+								</Setter>
+							</Style>
+						</ListBox.ItemContainerStyle>
+						<ListBox.ItemTemplate>
+							<DataTemplate>
+								<Border Name="border">
+									<Grid x:Name="grid"  Height="100" HorizontalAlignment="Stretch" Margin="3">
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition Width="100"/>
+											<ColumnDefinition Width="8*"/>
+											<ColumnDefinition Width="*"/>
+											<ColumnDefinition Width="1.5*"/>
+										</Grid.ColumnDefinitions>
+
+										<Image Grid.Column="0" Source="{Binding Path=BoxArt}" HorizontalAlignment="Center"/>
+
+										<TextBlock Grid.Column="1" Text="{Binding Path=GameName}" FontSize="20" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+
+										<TextBlock Grid.Column="2" Text="{Binding Path=Playtime}" FontSize="20" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+										<StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0">
+											<materialDesign:PopupBox PlacementMode="LeftAndAlignTopEdges" Margin="0,0,20,0">
+												<StackPanel>
+													<Button Command="{Binding Path=ConfigPcsx2Command}">
+														<Button.Content>
+															<StackPanel Orientation="Horizontal">
+																<fa:ImageAwesome Icon="Brands_Playstation" Height="15" Width="15" PrimaryColor="White" Margin="0,0,10,0"/>
+																<TextBlock>Configure in PCSX2</TextBlock>
+															</StackPanel>
+														</Button.Content>
+													</Button>
+													<Button Command="{Binding Path=RefetchCommand}">
+														<Button.Content>
+															<StackPanel Orientation="Horizontal">
+																<fa:ImageAwesome Icon="Solid_ArrowRotateLeft" Height="15" Width="15" PrimaryColor="White" Margin="0,0,10,0"/>
+																<TextBlock>Refetch Box Art</TextBlock>
+															</StackPanel>
+														</Button.Content>
+													</Button>
+													<Button Command="{Binding Path=ConfigCommand}">
+														<Button.Content>
+															<StackPanel Orientation="Horizontal">
+																<fa:ImageAwesome Icon="Solid_Gear" Height="15" Width="15" PrimaryColor="White" Margin="0,0,10,0"/>
+																<TextBlock>Game Configuration</TextBlock>
+															</StackPanel>
+														</Button.Content>
+													</Button>
+													<Button Command="{Binding Path=RemoveCommand}">
+														<Button.Content>
+															<StackPanel Orientation="Horizontal">
+																<fa:ImageAwesome Icon="Solid_Trash" Height="15" Width="15" PrimaryColor="White" Margin="0,0,10,0"/>
+																<TextBlock>Remove Game</TextBlock>
+															</StackPanel>
+														</Button.Content>
+													</Button>
+												</StackPanel>
+											</materialDesign:PopupBox>
+
+											<Button Grid.Column="4" Command="{Binding Path=PlayCommand}" Width="50" Height="50" ToolTip="Play Game" Background="Transparent" BorderBrush="Transparent">
+												<fa:ImageAwesome Icon="Solid_Play" PrimaryColor="White"/>
+											</Button>
+										</StackPanel>
+									</Grid>
+
+									<Border.Style>
+										<Style>
+											<Setter Property="Border.Background" Value="Transparent"></Setter>
+											<Style.Triggers>
+												<Trigger Property="Border.IsMouseOver" Value="True">
+													<Setter Property="Border.Background" Value="#33FFFFFF"></Setter>
+												</Trigger>
+											</Style.Triggers>
+										</Style>
+									</Border.Style>
+								</Border>
+
+							</DataTemplate>
+						</ListBox.ItemTemplate>
+					</ListBox>
+				</StackPanel>
 			</ScrollViewer>
 
 			<materialDesign:Snackbar MessageQueue="{materialDesign:MessageQueue}" x:Name="SnackBar"/>

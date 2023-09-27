@@ -16,11 +16,16 @@ using System.Windows.Threading;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Controls;
+using System.Windows.Media;
+using Spectabis_WPF.ViewModels;
 
 namespace Spectabis_WPF.Views
 {
     public partial class MainWindow : MetroWindow
     {
+        private LibraryViewModel Library { get; set; }
+
         public static string BaseDirectory = App.BaseDirectory;
     
         //Side panel width value
@@ -35,6 +40,8 @@ namespace Spectabis_WPF.Views
         public MainWindow()
         {
             InitializeComponent();
+
+            CheckForUpdates();
 
             //Create resources folder
             Directory.CreateDirectory($"{BaseDirectory}//resources//_temp");
@@ -64,7 +71,7 @@ namespace Spectabis_WPF.Views
 			}
 
             //Open game library page
-            mainFrame.Source = new Uri("Library.xaml", UriKind.Relative);
+            Open_Library();
 
             GameSettings.Width = PanelWidth;
 
@@ -78,7 +85,28 @@ namespace Spectabis_WPF.Views
             DiscordRpc.UpdatePresence("Menus");
         }
 
-		private static bool ShouldShowFirstTimeSetup() {
+        private void CheckForUpdates()
+        {
+            Console.WriteLine("Checking for updates...");
+            if (Properties.Settings.Default.checkupdates)
+            {
+                if (UpdateCheck.isNewUpdate())
+                {
+                    try
+                    {
+                        //Push snackbar
+                        this.Invoke(new Action(() => PushSnackbar("A new update is available!")));
+                    }
+                    catch
+                    {
+                        Console.WriteLine("Couldn't push update notification");
+                    }
+
+                }
+            }
+        }
+
+        private static bool ShouldShowFirstTimeSetup() {
 			var checkDir = Properties.Settings.Default.emuDir;
 
 			if (string.IsNullOrEmpty(checkDir))
@@ -251,16 +279,19 @@ namespace Spectabis_WPF.Views
 
         public void Open_Library()
         {
-            mainFrame.Source = new Uri("Library.xaml", UriKind.Relative);
+            var vm = new LibraryViewModel();
+            var lib = new Library(vm);
+            Library = vm;
+            mainFrame.Content = lib;
+            //mainFrame.Source = new Uri("Library.xaml", UriKind.Relative);
             MainWindow_Header.Text = "Library";
+            
         }
 
         public List<string> NewGamesInDirectory;
 
         public void Open_GameDiscovery()
         {
-            NewGamesInDirectory = ((Library)mainFrame.Content).NewGamesInDirectory;
-
             mainFrame.Source = new Uri("GameDiscovery.xaml", UriKind.Relative);
             MainWindow_Header.Text = "Game Discovery";
         }
@@ -450,8 +481,6 @@ namespace Spectabis_WPF.Views
                 artSource.UriSource = new Uri(BaseDirectory + @"\resources\configs\" + _game + @"\art.jpg");
                 artSource.EndInit();
                 GameSettings_Header.Source = artSource;
-
-                refreshTile(_game);
             }
         }
 
@@ -460,13 +489,12 @@ namespace Spectabis_WPF.Views
             mainFrame.NavigationService.Refresh();
         }
 
-        public void refreshTile(string game)
-        {
-            this.Invoke(new Action(() => ((Library)mainFrame.Content).refreshTile(game)));
-        }
-
         private void SaveGameSettings(string _name)
         {
+            var game = Library.Games.FirstOrDefault(x => x.GameName == _name);
+            if (game == null)
+                return;
+
             //Create instances for every ini file to save
             var gameIni = new IniFile(BaseDirectory + @"\resources\configs\" + _name + @"\spectabis.ini");
             var uiIni = new IniFile(BaseDirectory + @"\resources\configs\" + _name + @"\PCSX2_ui.ini");
@@ -477,6 +505,7 @@ namespace Spectabis_WPF.Views
             if (nogui.IsChecked == true)
             {
                 gameIni.Write("nogui", "1", "Spectabis");
+                
             }
             else
             {
@@ -903,7 +932,7 @@ namespace Spectabis_WPF.Views
 
         private void renameTile(string _old, string _new)
         {
-            this.Invoke(new Action(() => ((Library)mainFrame.Content).renameTile(_old, _new)));
+            //this.Invoke(new Action(() => ((Library)mainFrame.Content).renameTile(_old, _new)));
         }
 
         private void Menu_Themes_Click(object sender, RoutedEventArgs e)
@@ -1010,7 +1039,7 @@ namespace Spectabis_WPF.Views
         //Force Stop PCSX2 button
         private void ForceStop_Click(object sender, RoutedEventArgs e)
         {
-            Dispatcher.Invoke(new Action(() => ((Library)mainFrame.Content).ForceStop()));
+            Dispatcher.Invoke(new Action(() => Library.ForceStop()));
         }
 
         private void AprilFools_Button(object sender, RoutedEventArgs e)
@@ -1024,19 +1053,140 @@ namespace Spectabis_WPF.Views
 
             AprilFools_Grid.IsHitTestVisible = false;
 
-            Dispatcher.Invoke(new Action(() => ((Library)mainFrame.Content).PushSnackbar("Happy April Fools' Day! Pre-order 'Horse Armor DLC' now! ")));
+            Dispatcher.Invoke(new Action(() => PushSnackbar("Happy April Fools' Day! Pre-order 'Horse Armor DLC' now! ")));
 
             //Don't show this message again
             Properties.Settings.Default.aprilfooled = true;
             Properties.Settings.Default.Save();
         }
 
-        private void PushSnackbar(string msg)
+        public void PushSnackbar(string msg)
         {
             var messageQueue = SnackBar.MessageQueue;
 
             //the message queue can be called from any thread
             Task.Factory.StartNew(() => messageQueue.Enqueue(msg));
+        }
+
+        public void PushSnackbar(object content)
+        {
+            var messageQueue = SnackBar.MessageQueue;
+
+            //the message queue can be called from any thread
+            Task.Factory.StartNew(() => messageQueue.Enqueue(content));
+        }
+
+        //Push a snackbar when there's a huge number of new games in a directory
+        public void PushMultipleDirectoryDialog(int count, List<string> list)
+        {
+            NewGamesInDirectory = list;
+
+            TextBlock text = new TextBlock();
+            text.FontFamily = new FontFamily("Roboto Light");
+            text.Text = $"There are {count} new games in your directory";
+            text.TextWrapping = TextWrapping.Wrap;
+            text.VerticalAlignment = VerticalAlignment.Center;
+            text.Margin = new Thickness(0, 0, 10, 0);
+
+            Button OpenAll = new Button();
+            OpenAll.Content = "Show";
+            OpenAll.Click += MultipleDirectory_Click;
+            OpenAll.Margin = new Thickness(0, 0, 10, 0);
+
+            Button Dismiss = new Button();
+            Dismiss.Content = "Dismiss";
+            Dismiss.Click += MultipleDirectory_Click;
+
+            StackPanel panel = new StackPanel();
+            panel.Orientation = Orientation.Horizontal;
+            panel.Children.Add(text);
+            panel.Children.Add(OpenAll);
+            panel.Children.Add(Dismiss);
+
+            PushSnackbar(panel);
+        }
+
+        private void MultipleDirectory_Click(object sender, EventArgs e)
+        {
+            Button button = (Button)sender;
+            SnackBar.IsActive = false;
+
+            if (button.Content.ToString() == "Show")
+            {
+                //Navigate to Game Discovery page
+                ((MainWindow)Application.Current.MainWindow).Open_GameDiscovery();
+            }
+        }
+
+        private void PushDirectoryDialog(string game)
+        {
+            TextBlock text = new TextBlock();
+            text.FontFamily = new FontFamily("Roboto Light");
+            text.Text = $"Would you like to add \"{GetGameName.GetName(game)}\" ?";
+            text.TextWrapping = TextWrapping.Wrap;
+            text.VerticalAlignment = VerticalAlignment.Center;
+            text.Margin = new Thickness(0, 0, 10, 0);
+
+            Button YesButton = new Button();
+            YesButton.Content = "Yes";
+            YesButton.Margin = new Thickness(0, 0, 10, 0);
+            YesButton.Click += DirectoryDialog_Click;
+
+            Button NoButton = new Button();
+            NoButton.Content = "No";
+            NoButton.Click += DirectoryDialog_Click;
+
+            //Set file path as tag, so it can be accessed by Dialog_Click
+            YesButton.Tag = game;
+            NoButton.Tag = game;
+
+            StackPanel panel = new StackPanel();
+            panel.Orientation = Orientation.Horizontal;
+            panel.Children.Add(text);
+            panel.Children.Add(YesButton);
+            panel.Children.Add(NoButton);
+
+            PushSnackbar(panel);
+        }
+
+        //Directory Snackbar notification Yes/No buttons
+        private void DirectoryDialog_Click(object sender, EventArgs e)
+        {
+            //Get the game file from button tag
+            Button button = (Button)sender;
+            string game = button.Tag.ToString();
+
+            //Hide Snackbar
+            SnackBar.IsActive = false;
+
+            //Yes Button
+            if (button.Content.ToString() == "Yes")
+            {
+                Console.WriteLine("Adding " + game);
+
+                if (Properties.Settings.Default.titleAsFile)
+                {
+                    Library.AddGame(null, game, Path.GetFileNameWithoutExtension(game));
+                }
+                else
+                {
+                    Library.AddGame(null, game, GetGameName.GetName(game));
+                }
+            }
+
+            //No Button
+            else if (button.Content.ToString() == "No")
+            {
+                Console.WriteLine("Blacklisting " + game);
+
+                //Add game to blacklist file
+                Library.AddToBlacklist(game);
+
+                //var targetGame = Games.FirstOrDefault(x => x.GameName == game);
+                //if (targetGame != null)
+                //    targetGame.RemoveCommand.Execute(null);
+            }
+
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Spectabis_WPF.View_Models;
+﻿using Spectabis_WPF.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -23,10 +23,17 @@ namespace Spectabis_WPF.Views
 	/// </summary>
 	public partial class LibraryListControl : UserControl
 	{
-		public List<LibraryListGameViewModel> Games { get; set; } = new List<LibraryListGameViewModel>();
+		public List<LibraryGameViewModel> Games { get; set; } = new List<LibraryGameViewModel>();
 		public Process PCSX = new Process();
 		public LibraryListControl()
 		{
+			InitializeComponent();
+
+			this.DataContext = this;
+
+			if (System.ComponentModel.DesignerProperties.GetIsInDesignMode(this))
+				return;
+
 			var dir = App.BaseDirectory + @"\resources\configs\";
 
 			string[] _gamesdir = Directory.GetDirectories(dir);
@@ -37,24 +44,7 @@ namespace Spectabis_WPF.Views
 				string _gameName = game.Remove(0, game.LastIndexOf(System.IO.Path.DirectorySeparatorChar) + 1);
 
 				if (File.Exists(game + @"\Spectabis.ini"))
-					Games.Add(new LibraryListGameViewModel(_gameName, this));
-			}
-
-			InitializeComponent();
-
-			this.DataContext = this;
-		}
-
-		public void ForceStop()
-		{
-			try
-			{
-				PCSX.Kill();
-				Task.Run(new Action(() => ((MainWindow)Application.Current.MainWindow).BlockInput(false)));
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine(ex);
+					Games.Add(new LibraryGameViewModel(_gameName, this));
 			}
 		}
 	}
