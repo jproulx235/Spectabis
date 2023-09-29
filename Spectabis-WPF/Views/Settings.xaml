@@ -6,6 +6,7 @@
       xmlns:local="clr-namespace:Spectabis_WPF"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       xmlns:scraping="clr-namespace:Spectabis_WPF.Domain.Scraping"
+	  xmlns:fa="http://schemas.fontawesome.com/icons/svg"
       x:Class="Spectabis_WPF.Views.Settings"
       mc:Ignorable="d" 
       TextElement.Foreground="{DynamicResource MaterialDesignBody}"
@@ -13,148 +14,177 @@
       Background="{DynamicResource MaterialDesignPaper}"
       TextElement.FontSize="14"
       FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto" d:DesignWidth="720"
-      Title="Settings"
-      >
+      Title="Settings">
+	<Page.Resources>
+		<Style x:Key="Setting" TargetType="DockPanel">
+			<Setter Property="DockPanel.Background" Value="Transparent"></Setter>
+			<Style.Triggers>
+				<Trigger Property="DockPanel.IsMouseOver" Value="True">
+					<Setter Property="DockPanel.Background" Value="#33FFFFFF"></Setter>
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+	</Page.Resources>
     <ScrollViewer>
-    <Grid Margin="0,0,0,0" ScrollViewer.VerticalScrollBarVisibility="Auto">
-        <StackPanel>
-            <materialDesign:Card x:Name="Interaction" Margin="10,10,10,0" VerticalAlignment="Top" Height="170" >
-                <Grid>
-                    <Label FontSize="30" FontFamily="Roboto" Content="Spectabis" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Foreground="#DDA8A8A8" Height="45" Width="157"/>
-                    <StackPanel Orientation="Horizontal" Margin="10,55,0,0">
+		<Grid Margin="0,0,0,0" ScrollViewer.VerticalScrollBarVisibility="Auto">
+			<StackPanel>
+				<materialDesign:Card x:Name="Interaction" Margin="10,10,10,0" Padding="10" VerticalAlignment="Top">
+					<Grid>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="55"/>
+							<RowDefinition Height="*"/>
+						</Grid.RowDefinitions>
+						<Label Grid.Row="0" FontSize="30" FontFamily="Roboto" Content="Spectabis Settings" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#DDA8A8A8"/>
+						<StackPanel Grid.Row="1" Orientation="Vertical">
+							<DockPanel Height="50" Style="{StaticResource ResourceKey=Setting}">
+								<Label DockPanel.Dock="Left" Content="Show Game Titles" ToolTip="Show game title when hovering over game tiles" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+								<ToggleButton x:Name="showTitles" DockPanel.Dock="Right" IsChecked="{Binding Path=ShowTitles, Mode=TwoWay}" HorizontalAlignment="Right"  Margin="3,0,3,0" Grid.RowSpan="2" Grid.Column="1"/>
+							</DockPanel>
 
-                        <StackPanel Orientation="Vertical">
-                            <CheckBox x:Name="doubleclick" Content="Double-Click to Launch" Click="checkbox_Click"  HorizontalAlignment="Left" Width="174" Height="25" VerticalAlignment="Bottom" ToolTip="Double click to launch games"/>
-                            <CheckBox x:Name="showTitles" Content="Show Game Titles" Click="checkbox_Click" HorizontalAlignment="Left" Width="139" Height="25" VerticalAlignment="Top" ToolTip="Show game title when hovering over game tiles"/>
-                            <CheckBox x:Name="nightMode" Content="Night Mode" Click="checkbox_Click" HorizontalAlignment="Left" Width="174" Height="25" VerticalAlignment="Bottom" ToolTip="Darker theme, easier on eyes"/>
-                            <CheckBox x:Name="checkUpdates" Content="Check for updates" HorizontalAlignment="Left" Width="174" Height="25" Click="checkbox_Click" ToolTip="Display a notification when new Spectabis version is available"/>
-                        </StackPanel>
+							<DockPanel Height="50" Style="{StaticResource ResourceKey=Setting}">
+								<Label DockPanel.Dock="Left" Content="Dark Mode" ToolTip="Darker theme, easier on eyes" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+								<ToggleButton x:Name="nightMode" DockPanel.Dock="Right" IsChecked="{Binding Path=DarkMode, Mode=TwoWay}" HorizontalAlignment="Right"  Margin="3,0,3,0" Grid.RowSpan="2" Grid.Column="1"/>
+							</DockPanel>
 
-                        <StackPanel Orientation="Vertical" Margin="10,0,0,0">
-                            <CheckBox x:Name="AutoScrapping" Height="25" Content="Automatic boxart scraping" Click="checkbox_Click" ToolTip="Automatically download game cover art images"/>
-                            <CheckBox x:Name="SearchBar" Height="25" Content="Enable Searchbar" Click="checkbox_Click" ToolTip="Enables searchbar in Library. Press ENTER to search and ESC to cancel search"/>
-                            <CheckBox x:Name="TitleAsFile" Click="checkbox_Click" Height="25" Content="Disable game title detection" ToolTip="Newly created game profiles will be named same as the game file (without extension).&#10;Please note, this will also effect automatic boxart scraping.&#10;Useful for Launchbox."/>
-                            <CheckBox x:Name="Playtime" Click="checkbox_Click" Height="25" Content="Display Playtime" ToolTip="Display playtime when hovering games"/>
-                            <CheckBox x:Name="Tooltips" Height="25" Content="Title Tooltips" Click="checkbox_Click" Visibility="Collapsed" />
-                        </StackPanel>
+							<DockPanel Height="50" Style="{StaticResource ResourceKey=Setting}">
+								<Label DockPanel.Dock="Left" Content="Auto check for updates" ToolTip="Display a notification when new Spectabis version is available" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+								<ToggleButton x:Name="checkUpdates" DockPanel.Dock="Right" IsChecked="{Binding Path=CheckUpdates, Mode=TwoWay}" HorizontalAlignment="Right"  Margin="3,0,3,0" Grid.RowSpan="2" Grid.Column="1"/>
+							</DockPanel>
 
-                    </StackPanel>
+							<DockPanel Height="50" Style="{StaticResource ResourceKey=Setting}">
+								<Label DockPanel.Dock="Left" Content="Automatic boxart scraping" ToolTip="Automatically download game cover art images" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+								<ToggleButton x:Name="AutoScrapping" DockPanel.Dock="Right" IsChecked="{Binding Path=AutoScraping, Mode=TwoWay}" HorizontalAlignment="Right"  Margin="3,0,3,0" Grid.RowSpan="2" Grid.Column="1"/>
+							</DockPanel>
 
-                </Grid>
-            </materialDesign:Card>
+							<DockPanel Height="50" Style="{StaticResource ResourceKey=Setting}">
+								<Label DockPanel.Dock="Left" Content="Enable Searchbar" ToolTip="Enables searchbar in Library. Press ENTER to search and ESC to cancel search" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+								<ToggleButton x:Name="SearchBar" DockPanel.Dock="Right" IsChecked="{Binding Path=ShowSearchBar, Mode=TwoWay}" HorizontalAlignment="Right"  Margin="3,0,3,0" Grid.RowSpan="2" Grid.Column="1"/>
+							</DockPanel>
 
-            <materialDesign:Card Margin="10,16,10,0" Padding="0,0,0,10">
-                <StackPanel>
-                    <Grid>
-                        <Label FontSize="30" FontFamily="Roboto" Content="Scraping APIs" Margin="10,10,0,0" Foreground="#DDA8A8A8" Height="45"/>
-                        <Button Click="ResetPrioritiesClick" Content="Reset Priorities" HorizontalAlignment="Right" Margin="0,0,20,0" />
-                    </Grid>
+							<DockPanel Height="50" Style="{StaticResource ResourceKey=Setting}">
+								<Label DockPanel.Dock="Left" Content="Disable game title detection" ToolTip="Newly created game profiles will be named same as the game file (without extension).&#10;Please note, this will also effect automatic boxart scraping.&#10;Useful for Launchbox." HorizontalAlignment="Left" VerticalAlignment="Center"/>
+								<ToggleButton x:Name="TitleAsFile" DockPanel.Dock="Right" IsChecked="{Binding Path=TitleAsFile, Mode=TwoWay}" HorizontalAlignment="Right"  Margin="3,0,3,0" Grid.RowSpan="2" Grid.Column="1"/>
+							</DockPanel>
 
-                    <ListView BorderThickness="0" Background="Transparent" BorderBrush="Transparent" x:Name="ApiKeysListView">
-                        <ListView.ItemContainerStyle>
-                            <Style TargetType="{x:Type ListViewItem}">
-                                <Setter Property="Background" Value="Transparent" />
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="{x:Type ListViewItem}">
-                                            <ContentPresenter />
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </ListView.ItemContainerStyle>
-                        <ListView.ItemTemplate>
-                            <DataTemplate DataType="scraping:ApiItem">
-                                <Grid Margin="5,0,0,5">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="50"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="1*"/>
-                                        <RowDefinition Height="1*"/>
-                                    </Grid.RowDefinitions>
-                                    <Grid Grid.Column="0" Grid.Row="1">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="1*"/>
-                                            <RowDefinition Height="1*"/>
-                                        </Grid.RowDefinitions>
-                                        <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="1*"/>
-                                                <ColumnDefinition Width="2*"/>
-                                            </Grid.ColumnDefinitions>
-                                        <Button Click="ApiItemUpClick" DataContext="{Binding}" Content="▲" FontSize="10" HorizontalAlignment="Stretch" Padding="0" VerticalAlignment="Stretch" Height="15" Margin="0,0,0,2" />
-                                        <Button Click="ApiItemDownClick" DataContext="{Binding}" Content="▼" FontSize="10" Foreground="White" Padding="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Height="15" Grid.Row="1" />
-                                        <ToggleButton Click="ApiItemToggleClick"  Margin="3,0,3,0" Grid.RowSpan="2" Grid.Column="1" DataContext="{Binding}" />
-                                    </Grid>
-                                    <TextBlock Grid.Row="0" Grid.Column="1" Margin="30,0" Text="{Binding ApiName}"></TextBlock>
-                                    <Border Grid.Row="1" Grid.Column="1" BorderThickness="2" BorderBrush="#bbb" CornerRadius="3" Margin="5,0,20,0">
-                                        <TextBox  Text="{Binding ApiKey}" BorderThickness="0" VerticalContentAlignment="Center" Padding="10,0">
-                                            <TextBox.Style>
-                                                <Style TargetType="TextBox">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsFreeApi}" Value="True">
-                                                            <Setter Property="IsEnabled" Value="False"></Setter>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding IsFreeApi}" Value="False">
-                                                            <Setter Property="IsEnabled" Value="True"></Setter>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBox.Style>
-                                        </TextBox>
-                                    </Border>
-                                </Grid>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                        <ListView.Items>
-                            <scraping:ApiItem ApiName="GiantBomb" ApiKey="d6356ce53a374e55b91d8018f5a59d43" />
-                            <scraping:ApiItem ApiName="TheGamesDB" ApiKey="e79660b6dd1245d4876a2e983ea7f5ab" />
-                            <scraping:ApiItem ApiName="IGDB" ApiKey="2cf5bede3f8c4eca9f55958c73b58eb6" />
-                            <scraping:ApiItem ApiName="Moby Games" ApiKey="8830485ffd8241f1a316db413f1806f4" />
-                            <scraping:ApiItem ApiName="TheGamesDB Html" IsFreeApi="True" />
-                        </ListView.Items>
-                    </ListView>
-                </StackPanel>
-            </materialDesign:Card>
-            
-            <materialDesign:Card Margin="10,16" Padding="0,0,0,10">
-                <Grid>
-                    <StackPanel VerticalAlignment="Stretch">
-                        <Label FontSize="30" FontFamily="Roboto" Content="Emulator" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Foreground="#DDA8A8A8" Height="45"/>
+							<DockPanel Height="50" Style="{StaticResource ResourceKey=Setting}">
+								<Label DockPanel.Dock="Left" Content="Display Playtime" ToolTip="Display playtime when hovering games" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+								<ToggleButton x:Name="Playtime" DockPanel.Dock="Right" IsChecked="{Binding Path=ShowPlaytime, Mode=TwoWay}" HorizontalAlignment="Right"  Margin="3,0,3,0" Grid.RowSpan="2" Grid.Column="1"/>
+							</DockPanel>
 
-                        <Grid Height="55" HorizontalAlignment="Stretch">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="auto" MinWidth="127"/>
-                                <ColumnDefinition Width="Auto" MinWidth="95"/>
-                                <ColumnDefinition Width="auto" MinWidth="130"/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition Width="auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Content="PCSX2 Directory:" Margin="5,14" VerticalAlignment="Center" Grid.Column="0" Height="27"/>
+							<DockPanel Height="50" Style="{StaticResource ResourceKey=Setting}">
+								<Label DockPanel.Dock="Left" Content="Title Tooltips" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+								<ToggleButton x:Name="Tooltips" DockPanel.Dock="Right" IsChecked="{Binding Path=ShowTooltips, Mode=TwoWay}" HorizontalAlignment="Right"  Margin="3,0,3,0" Grid.RowSpan="2" Grid.Column="1"/>
+							</DockPanel>
+						</StackPanel>
 
-                            <Button x:Name="Save_Button" FontFamily="Roboto Light" Click="Save_Directory" Margin="5,12,5,11" Grid.Column="1" Height="Auto">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" >
-                                    <TextBlock Text="Save"/>
-                                    <materialDesign:PackIcon Kind="ContentSave" Margin="5,0" />
-                                </StackPanel>
-                            </Button>
+					</Grid>
+				</materialDesign:Card>
 
-                            <Button Margin="5,12,5,11" Grid.Column="2" FontFamily="Roboto Light" Style="{StaticResource MaterialDesignRaisedLightButton}" Height="Auto" Click="Browse_Click">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <TextBlock Text="Browse"/>
-                                    <materialDesign:PackIcon Kind="Folder" Margin="5,0" />
-                                </StackPanel>
-                            </Button>
-                            <TextBox x:Name="emudir_text" Grid.Column="3" VerticalAlignment="Center" TextAlignment="Left" Text="C:\Program Filez\SpectabisWPF\folder\anotherfolder\PCSX2" FontFamily="Roboto" Width="Auto" Margin="10" Height="30"/>
-                        </Grid>
+				<materialDesign:Card Margin="10" Padding="10">
+					<StackPanel>
+						<Grid>
+							<Label FontSize="30" FontFamily="Roboto" Content="Scraping APIs" Foreground="#DDA8A8A8" Height="45"/>
+							<Button Content="Reset Priorities" Command="{Binding Path=ResetCommand}" HorizontalAlignment="Right" />
+						</Grid>
 
-                    </StackPanel>
-                </Grid>
-            </materialDesign:Card>
-        </StackPanel>
-        <materialDesign:Snackbar MessageQueue="{materialDesign:MessageQueue}" x:Name="Snackbar"/>
+						<ListView BorderThickness="0" Background="Transparent" BorderBrush="Transparent" x:Name="ApiKeysListView" ItemsSource="{Binding Path=ApiItems}">
+							<ListView.ItemContainerStyle>
+								<Style TargetType="{x:Type ListViewItem}">
+									<Setter Property="Background" Value="Transparent" />
+									<Setter Property="Template">
+										<Setter.Value>
+											<ControlTemplate TargetType="{x:Type ListViewItem}">
+												<ContentPresenter />
+											</ControlTemplate>
+										</Setter.Value>
+									</Setter>
+								</Style>
+							</ListView.ItemContainerStyle>
+							<ListView.ItemTemplate>
+								<DataTemplate DataType="scraping:ApiItem">
+									<Grid Margin="5,0,0,15">
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition Width="75"/>
+											<ColumnDefinition Width="*"/>
+										</Grid.ColumnDefinitions>
+										<Grid.RowDefinitions>
+											<RowDefinition Height="*"/>
+											<RowDefinition Height="*"/>
+										</Grid.RowDefinitions>
+										<Grid Grid.Column="0" Grid.Row="0" Grid.RowSpan="2">
+											<Grid.RowDefinitions>
+												<RowDefinition Height="1*"/>
+												<RowDefinition Height="1*"/>
+											</Grid.RowDefinitions>
+											<Grid.ColumnDefinitions>
+												<ColumnDefinition Width="1*"/>
+												<ColumnDefinition Width="2*"/>
+											</Grid.ColumnDefinitions>
+											<Button Command="{Binding Path=UpCommand}" FontSize="10" HorizontalAlignment="Stretch" Padding="0" VerticalAlignment="Stretch" Height="20" Margin="0,0,0,5">
+												<fa:ImageAwesome Icon="Solid_ArrowUp" Width="10" Height="10" HorizontalAlignment="Center" PrimaryColor="White"></fa:ImageAwesome>
+											</Button>
+											<Button Command="{Binding Path=DownCommand}" FontSize="10" Foreground="White" Padding="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Height="20" Grid.Row="1">
+												<fa:ImageAwesome Icon="Solid_ArrowDown" Width="10" Height="10" HorizontalAlignment="Center" PrimaryColor="White"></fa:ImageAwesome>
+											</Button>
+											<ToggleButton Margin="3,0,3,0" Grid.RowSpan="2" Grid.Column="1" IsChecked="{Binding Path=Enabled, Mode=TwoWay}" />
+										</Grid>
+										<TextBlock Grid.Row="0" Grid.Column="1" Margin="10,0" Text="{Binding Path=ApiName}"/>
+										<TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Path=ApiKey}" VerticalContentAlignment="Center" Padding="10,0" Margin="5,0,0,0">
+											<TextBox.Style>
+												<Style TargetType="TextBox">
+													<Style.Triggers>
+														<DataTrigger Binding="{Binding Path=IsFreeApi}" Value="True">
+															<Setter Property="IsEnabled" Value="False"></Setter>
+														</DataTrigger>
+														<DataTrigger Binding="{Binding Path=IsFreeApi}" Value="False">
+															<Setter Property="IsEnabled" Value="True"></Setter>
+														</DataTrigger>
+													</Style.Triggers>
+												</Style>
+											</TextBox.Style>
+										</TextBox>
+									</Grid>
+								</DataTemplate>
+							</ListView.ItemTemplate>
+							<!--<ListView.Items>
+								<scraping:ApiItem ApiName="GiantBomb" ApiKey="d6356ce53a374e55b91d8018f5a59d43" />
+								<scraping:ApiItem ApiName="TheGamesDB" ApiKey="e79660b6dd1245d4876a2e983ea7f5ab" />
+								<scraping:ApiItem ApiName="IGDB" ApiKey="2cf5bede3f8c4eca9f55958c73b58eb6" />
+								<scraping:ApiItem ApiName="Moby Games" ApiKey="8830485ffd8241f1a316db413f1806f4" />
+								<scraping:ApiItem ApiName="TheGamesDB Html" IsFreeApi="True" />
+							</ListView.Items>-->
+						</ListView>
+					</StackPanel>
+				</materialDesign:Card>
 
-    </Grid>
-    </ScrollViewer>
+				<materialDesign:Card Margin="10,16" Padding="0,0,0,10">
+					<Grid>
+						<StackPanel VerticalAlignment="Stretch">
+							<Label FontSize="30" FontFamily="Roboto" Content="Emulator" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Foreground="#DDA8A8A8" Height="45"/>
+
+							<Grid Height="55" HorizontalAlignment="Stretch">
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="auto" MinWidth="127"/>
+									<ColumnDefinition Width="*"/>
+									<ColumnDefinition Width="auto" MinWidth="130"/>
+								</Grid.ColumnDefinitions>
+								<Label Content="PCSX2 Location" Margin="5,14" VerticalAlignment="Center" Grid.Column="0" Height="27"/>
+
+								<Button Margin="5,12,5,11" Grid.Column="2" FontFamily="Roboto Light" Height="Auto" Command="{Binding Path=BrowseCommand}">
+									<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+										<TextBlock Text="Browse"/>
+										<fa:ImageAwesome Icon="Solid_FolderOpen" Height="13" Width="13" PrimaryColor="White" Margin="5,0"/>
+									</StackPanel>
+								</Button>
+								<TextBox x:Name="emudir_text" Grid.Column="1" VerticalAlignment="Center" TextAlignment="Left" Text="{Binding Path=EmuDir, Mode=TwoWay}" FontFamily="Roboto" Width="Auto" Margin="10" Height="30"/>
+							</Grid>
+
+						</StackPanel>
+					</Grid>
+				</materialDesign:Card>
+			</StackPanel>
+			<materialDesign:Snackbar MessageQueue="{materialDesign:MessageQueue}" x:Name="Snackbar"/>
+
+		</Grid>
+	</ScrollViewer>
 </Page>

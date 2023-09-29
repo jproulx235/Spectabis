@@ -23,11 +23,17 @@ namespace Spectabis_WPF.ViewModels
 	{
 		private string gameConfigs = App.BaseDirectory + @"\resources\configs\";
 
-		private LibraryListControl list;
 		private LibraryViewModel library;
-
-
 		private string gameName;
+		private BitmapImage boxArt;
+		private int playtimeMinutes;
+		private ICommand _playCommand;
+		private ICommand _configPcsx2Command;
+		private ICommand _configCommand;
+		private ICommand _removeCommand;
+		private ICommand _refetchCommand;
+		private SolidColorBrush _primaryColor;
+
 		public string GameName
 		{
 			get => gameName;
@@ -38,7 +44,6 @@ namespace Spectabis_WPF.ViewModels
 			}
 		}
 
-		private BitmapImage boxArt;
 		public BitmapImage BoxArt 
 		{ 
 			get => boxArt;
@@ -48,8 +53,17 @@ namespace Spectabis_WPF.ViewModels
 				OnPropertyChanged(nameof(BoxArt));
 			} 
 		}
-		public int PlaytimeMinutes { get; set; }
-		public decimal PlaytimeHours => PlaytimeMinutes / 60;
+
+		public int PlaytimeMinutes 
+		{ 
+			get => playtimeMinutes;
+			set
+			{
+				playtimeMinutes = value;
+				OnPropertyChanged(nameof(PlaytimeMinutes));
+			} 
+		}
+		public decimal PlaytimeHours => (decimal)PlaytimeMinutes / (decimal)60;
 
 		public string Playtime 
 		{ 
@@ -66,7 +80,7 @@ namespace Spectabis_WPF.ViewModels
 			} 
 		}
 
-		private ICommand _playCommand;
+		public Visibility PlaytimeVisibility { get; set; } = Visibility.Hidden;
 
 		public ICommand PlayCommand
 		{
@@ -82,8 +96,6 @@ namespace Spectabis_WPF.ViewModels
 			}
 		}
 
-		private ICommand _configPcsx2Command;
-
 		public ICommand ConfigPcsx2Command
 		{
 			get
@@ -97,8 +109,6 @@ namespace Spectabis_WPF.ViewModels
 				return _configPcsx2Command;
 			}
 		}
-
-		private ICommand _configCommand;
 
 		public ICommand ConfigCommand
 		{
@@ -114,8 +124,6 @@ namespace Spectabis_WPF.ViewModels
 			}
 		}
 
-		private ICommand _removeCommand;
-
 		public ICommand RemoveCommand
 		{
 			get
@@ -129,8 +137,6 @@ namespace Spectabis_WPF.ViewModels
 				return _removeCommand;
 			}
 		}
-
-		private ICommand _refetchCommand;
 
 		public ICommand RefetchCommand
 		{
@@ -146,7 +152,6 @@ namespace Spectabis_WPF.ViewModels
 			}
 		}
 
-		private SolidColorBrush _primaryColor;
 		public SolidColorBrush PrimaryColor
 		{
 			get => _primaryColor;
@@ -155,22 +160,6 @@ namespace Spectabis_WPF.ViewModels
 				_primaryColor = value;
 				OnPropertyChanged(nameof(PrimaryColor));
 			}
-		}
-
-		public LibraryGameViewModel(string gameName, LibraryListControl list)
-		{
-			this.list = list;
-			GameName = gameName;
-
-			if (Properties.Settings.Default.playtime == true)
-			{
-				IniFile spectabis = new IniFile($"{gameConfigs}//{gameName}//spectabis.ini");
-				string minutes = spectabis.Read("playtime", "Spectabis");
-
-				PlaytimeMinutes = minutes != "" ? Convert.ToInt32(minutes) : 0;
-			}
-
-			refreshArt();
 		}
 
 		public LibraryGameViewModel(string gameName, LibraryViewModel library)
@@ -184,6 +173,7 @@ namespace Spectabis_WPF.ViewModels
 				string minutes = spectabis.Read("playtime", "Spectabis");
 
 				PlaytimeMinutes = minutes != "" ? Convert.ToInt32(minutes) : 0;
+				PlaytimeVisibility = Visibility.Visible;
 			}
 
 			refreshArt();
@@ -231,21 +221,18 @@ namespace Spectabis_WPF.ViewModels
 			Console.WriteLine($"CopyGlobalProfile({GameName})");
 			GameProfile.CopyGlobalProfile(GameName);
 
-			if(list != null)
-			{
-				list.PCSX = LaunchPCSX2.CreateGameProcess(GameName);
-				list.PCSX.EnableRaisingEvents = true;
-				list.PCSX.Exited += new EventHandler(PCSX_Exited);
-
-				list.PCSX.Start();
-			}
-			else if(library != null)
+			if(library != null)
 			{
 				library.PCSX = LaunchPCSX2.CreateGameProcess(GameName);
 				library.PCSX.EnableRaisingEvents = true;
 				library.PCSX.Exited += new EventHandler(PCSX_Exited);
 
 				library.PCSX.Start();
+			}
+			else
+			{
+				((MainWindow)Application.Current.MainWindow).PushSnackbar("Could not launch PCSX2!");
+				return;
 			}
 			
 
@@ -289,10 +276,10 @@ namespace Spectabis_WPF.ViewModels
 			IniFile SpectabisINI = new IniFile(gameConfigs + @"\" + GameName + @"\spectabis.ini");
 			AddToBlacklist(SpectabisINI.Read("isoDirectory", "Spectabis"));
 
-			if (list != null)
-				list.Games.Remove(this);
-			else if (library != null)
+			if (library != null)
 				library.Games.Remove(this);
+			else
+				return;
 
 			//Delete profile folder
 			if (Directory.Exists(gameConfigs + @"/" + GameName))
@@ -300,17 +287,16 @@ namespace Spectabis_WPF.ViewModels
 				try
 				{
 					Directory.Delete(gameConfigs + @"/" + GameName, true);
-
 				}
 				catch
 				{
-					//list.PushSnackbar("Failed to delete game files!");
+					((MainWindow)Application.Current.MainWindow).PushSnackbar("Failed to delete game files!");
 				}
 
 			}
 
 			//Reload game list
-			//reloadGames();
+			library.ReloadGames();
 		}
 
 		private void AddToBlacklist(string _file)
@@ -338,8 +324,9 @@ namespace Spectabis_WPF.ViewModels
 				var scraper = new ScrapeArt(GameName);
 				var result = scraper.Result;
 
-				//if (result == null)
-				//	PushSnackbar("Couldn't get the game, sorry");
+				// This causes an exception!
+				if (result == null)
+					((MainWindow)Application.Current.MainWindow).PushSnackbar("Couldn't get the game, sorry");
 
 				if (result != null)
 					refreshArt();

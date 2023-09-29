@@ -238,28 +238,16 @@ namespace Spectabis_WPF.Views
         //Menu - Library Button
         private void Menu_Library_Click(object sender, RoutedEventArgs e)
         {
-            mainFrame.Source = new Uri("Library.xaml", UriKind.Relative);
-            MainWindow_Header.Text = "Library";
+            Open_Library();
             Overlay(false);
-
-            Console.WriteLine(this.Width + " x " + this.Height);
-
-        }
-
-        private void Menu_LibraryList_Click(object sender, RoutedEventArgs e)
-        {
-            mainFrame.Source = new Uri("LibraryList.xaml", UriKind.Relative);
-            MainWindow_Header.Text = "Library List";
-            Overlay(false);
-
-            Console.WriteLine(this.Width + " x " + this.Height);
-
         }
 
         //Menu - Settings Button
         private void Menu_Settings_Click(object sender, RoutedEventArgs e)
         {
-            mainFrame.Source = new Uri("Settings.xaml", UriKind.Relative);
+            var vm = new SettingsViewModel();
+            var settings = new Settings(vm);
+            mainFrame.Content = settings;
             MainWindow_Header.Text = "Settings";
             Overlay(false);
         }
@@ -283,9 +271,7 @@ namespace Spectabis_WPF.Views
             var lib = new Library(vm);
             Library = vm;
             mainFrame.Content = lib;
-            //mainFrame.Source = new Uri("Library.xaml", UriKind.Relative);
             MainWindow_Header.Text = "Library";
-            
         }
 
         public List<string> NewGamesInDirectory;
@@ -1114,11 +1100,11 @@ namespace Spectabis_WPF.Views
             if (button.Content.ToString() == "Show")
             {
                 //Navigate to Game Discovery page
-                ((MainWindow)Application.Current.MainWindow).Open_GameDiscovery();
+                Open_GameDiscovery();
             }
         }
 
-        private void PushDirectoryDialog(string game)
+        public void PushDirectoryDialog(string game)
         {
             TextBlock text = new TextBlock();
             text.FontFamily = new FontFamily("Roboto Light");
@@ -1173,20 +1159,6 @@ namespace Spectabis_WPF.Views
                     Library.AddGame(null, game, GetGameName.GetName(game));
                 }
             }
-
-            //No Button
-            else if (button.Content.ToString() == "No")
-            {
-                Console.WriteLine("Blacklisting " + game);
-
-                //Add game to blacklist file
-                Library.AddToBlacklist(game);
-
-                //var targetGame = Games.FirstOrDefault(x => x.GameName == game);
-                //if (targetGame != null)
-                //    targetGame.RemoveCommand.Execute(null);
-            }
-
         }
     }
 }

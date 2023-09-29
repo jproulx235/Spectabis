@@ -8,17 +8,27 @@ using System.Diagnostics;
 using Spectabis_WPF.Properties;
 
 namespace Spectabis_WPF.Domain {
+
+    public enum ScraperType
+	{
+        GiantBomb = 0,
+        TheGamesDbApi = 1,
+        IGDB = 2,
+        TheGamesDbHtml = 3,
+        MobyGames = 4
+	}
+
     public class ScrapeArt {
         private static readonly string BaseDirectory = App.BaseDirectory;
 
         public GameInfoModel Result;
 
-        public static Dictionary<int, IScraperApi> Scrapers = new Dictionary<int, IScraperApi>{
-			{ 0, new Scraping.Api.GiantBombApi() },
-            { 1, new Scraping.Api.TheGamesDbApi() },
-            { 2, new Scraping.Api.IGDBApi() },
-            { 3, new Scraping.Api.TheGamesDbHtml() },
-			{ 4, new Scraping.Api.MobyGamesApi() }
+        public static Dictionary<ScraperType, IScraperApi> Scrapers = new Dictionary<ScraperType, IScraperApi>{
+			{ ScraperType.GiantBomb, new Scraping.Api.GiantBombApi() },
+            { ScraperType.TheGamesDbApi, new Scraping.Api.TheGamesDbApi() },
+            { ScraperType.IGDB, new Scraping.Api.IGDBApi() },
+            { ScraperType.TheGamesDbHtml, new Scraping.Api.TheGamesDbHtml() },
+			{ ScraperType.MobyGames, new Scraping.Api.MobyGamesApi() }
 		};
 
 	    private class PerformanceStat {
@@ -26,7 +36,7 @@ namespace Spectabis_WPF.Domain {
 		    public List<float> Milliseconds { get; } = new List<float>();
 		    public float AverageMs => Milliseconds.Average();
 	    }
-		private static readonly Dictionary<int, PerformanceStat> ApiPerformanceStats = new Dictionary<int, PerformanceStat>();
+		private static readonly Dictionary<ScraperType, PerformanceStat> ApiPerformanceStats = new Dictionary<ScraperType, PerformanceStat>();
 
         public ScrapeArt(string title) {
             var order = new[] {
@@ -36,54 +46,47 @@ namespace Spectabis_WPF.Domain {
 				.First(p=>string.IsNullOrEmpty(p) == false)
 				.Split(',')
 		        .Select(int.Parse)
-		        .ToArray();
+                .Select(x => (ScraperType)x)
+		        .ToList();
 
-	        Scrapers = Scrapers
-		        .Select((p, i) => i)
-		        .ToDictionary(
-			        p => order[p],
-			        p => Scrapers[order[p]]
-		        );
+            foreach(var i in order)
+			{
+                var scraper = Scrapers[i];
 
-			var scraperOrder = Scrapers                
-				.OrderBy(p => ApiPerformanceStats.ContainsKey(p.Key) ? ApiPerformanceStats[p.Key].Failures : 100)
-				.ThenBy(p => ApiPerformanceStats.ContainsKey(p.Key) ? ApiPerformanceStats[p.Key].AverageMs : 100)
-				.ToArray();
+                if (ApiPerformanceStats.ContainsKey(i) == false)
+                    ApiPerformanceStats[i] = new PerformanceStat();
 
-			Settings.Default.APIAutoSequence = string.Join(",", scraperOrder.Select(p=>p.Key));
-	        Settings.Default.Save();
-
-			foreach (var scraper in scraperOrder) {
-				if(ApiPerformanceStats.ContainsKey(scraper.Key) == false)
-					ApiPerformanceStats[scraper.Key] = new PerformanceStat();
-
-				var stopwatch = new Stopwatch();
-				stopwatch.Start();
-                try {
-                    Result = scraper.Value.GetDataFromApi(title);
+                var stopwatch = new Stopwatch();
+                stopwatch.Start();
+                try
+                {
+                    Result = scraper.GetDataFromApi(title);
                 }
-                catch (Exception e) {
-                    File.AppendAllText(Path.Combine(BaseDirectory, "resources", "logs", "ScrapeError.log"), 
-                        "["+DateTime.Now+"] " + scraper.Value.GetType().FullName + "\r\nError: " +
+                catch (Exception e)
+                {
+                    File.AppendAllText(Path.Combine(BaseDirectory, "resources", "logs", "ScrapeError.log"),
+                        "[" + DateTime.Now + "] " + scraper.GetType().FullName + "\r\nError: " +
                         e.Message + "\r\n" + e.StackTrace + "\r\n\r\n");
                     Result = null;
                 }
-                if (Result?.ThumbnailUrl == null) {
-					stopwatch.Stop();
-	                ApiPerformanceStats[scraper.Key].Milliseconds.Add(stopwatch.ElapsedMilliseconds);
-	                ApiPerformanceStats[scraper.Key].Failures++;
-					continue;
-				}
+                if (Result?.ThumbnailUrl == null)
+                {
+                    stopwatch.Stop();
+                    ApiPerformanceStats[i].Milliseconds.Add(stopwatch.ElapsedMilliseconds);
+                    ApiPerformanceStats[i].Failures++;
+                    continue;
+                }
 
-				var downloadSuccess = SaveImageFromUrl(title, Result.ThumbnailUrl);
-	            if (downloadSuccess == false) {
-					stopwatch.Stop();
-					ApiPerformanceStats[scraper.Key].Milliseconds.Add(stopwatch.ElapsedMilliseconds);
-		            ApiPerformanceStats[scraper.Key].Failures++;
-					continue;
-				}
-				stopwatch.Stop();
-				ApiPerformanceStats[scraper.Key].Milliseconds.Add(stopwatch.ElapsedMilliseconds);
+                var downloadSuccess = SaveImageFromUrl(title, Result.ThumbnailUrl);
+                if (downloadSuccess == false)
+                {
+                    stopwatch.Stop();
+                    ApiPerformanceStats[i].Milliseconds.Add(stopwatch.ElapsedMilliseconds);
+                    ApiPerformanceStats[i].Failures++;
+                    continue;
+                }
+                stopwatch.Stop();
+                ApiPerformanceStats[i].Milliseconds.Add(stopwatch.ElapsedMilliseconds);
                 return;
             }
 

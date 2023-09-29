@@ -196,9 +196,6 @@ namespace Spectabis_WPF.ViewModels
             }
         }
 
-        
-
-
         public LibraryViewModel()
 		{
             Console.WriteLine("Opening Library...");
@@ -318,7 +315,7 @@ namespace Spectabis_WPF.ViewModels
                                 {
                                     //Show a Yes/No message box
                                     //If "Yes" then add the game, if not, add it to blacklist
-                                    //Application.Current.Dispatcher.Invoke(new Action(() => PushDirectoryDialog(file)));
+                                    Application.Current.Dispatcher.Invoke(new Action(() => mainWindow.PushDirectoryDialog(file)));
                                 }
                             }
                             else
