@@ -54,13 +54,13 @@ namespace Spectabis_WPF.Views
             Console.WriteLine(Assembly.GetExecutingAssembly().GetName().Version);
 
             //Sets nightmode from variable
-            new PaletteHelper().SetLightDark(Properties.Settings.Default.nightMode);
+            new PaletteHelper().SetLightDark(Properties.Settings.Default.NightMode);
 
 			//If emuDir is not set, launch first time setup
 	        if (ShouldShowFirstTimeSetup())
 		        FirstSetupFrame.Visibility = Visibility.Visible;
 
-			SetPrimary(Properties.Settings.Default.swatch);
+			SetPrimary(Properties.Settings.Default.Swatch);
 
 			//Copy spinner.gif to temporary files
 			{
@@ -76,7 +76,7 @@ namespace Spectabis_WPF.Views
             GameSettings.Width = PanelWidth;
 
             //Check if it's april fool's day
-            if ((DateTime.Now.Month == 4) && (DateTime.Now.Day == 1) && (Properties.Settings.Default.aprilfooled == false))
+            if ((DateTime.Now.Month == 4) && (DateTime.Now.Day == 1) && (Properties.Settings.Default.Aprilfooled == false))
             {
                 AprilFools_Grid.Visibility = Visibility.Visible;
             }
@@ -88,7 +88,7 @@ namespace Spectabis_WPF.Views
         private void CheckForUpdates()
         {
             Console.WriteLine("Checking for updates...");
-            if (Properties.Settings.Default.checkupdates)
+            if (Properties.Settings.Default.Checkupdates)
             {
                 if (UpdateCheck.isNewUpdate())
                 {
@@ -107,7 +107,7 @@ namespace Spectabis_WPF.Views
         }
 
         private static bool ShouldShowFirstTimeSetup() {
-			var checkDir = Properties.Settings.Default.emuDir;
+			var checkDir = Properties.Settings.Default.EmuExePath;
 
 			if (string.IsNullOrEmpty(checkDir))
 				return true;
@@ -117,7 +117,7 @@ namespace Spectabis_WPF.Views
 
 			checkDir = Path.Combine(checkDir, "pcsx2.exe");
 			if (File.Exists(checkDir)) {
-				Properties.Settings.Default.emuDir = checkDir;
+				Properties.Settings.Default.EmuExePath = checkDir;
 				Properties.Settings.Default.Save();
 				return false;
 			}
@@ -288,98 +288,13 @@ namespace Spectabis_WPF.Views
         {
             if(e == true)
             {
-                string _cfgDir = BaseDirectory + @"\resources\configs\" + _name;
-
-                //Reads the values from Spectabis ini
-                var gameIni = new IniFile(_cfgDir + @"\spectabis.ini");
-                var _nogui = gameIni.Read("nogui", "Spectabis");
-                var _fullscreen = gameIni.Read("fullscreen", "Spectabis");
-                var _fullboot = gameIni.Read("fullboot", "Spectabis");
-                var _nohacks = gameIni.Read("nohacks", "Spectabis");
-                var _isodir = gameIni.Read("isoDirectory", "Spectabis");
-
-                //Sets the values from spectabis ini
-                if (_nogui == "1") { nogui.IsChecked = true; } else { nogui.IsChecked = false; }
-                if (_fullscreen == "1") { fullscreen.IsChecked = true; } else {fullscreen.IsChecked = false; }
-                if (_fullboot == "1") { fullboot.IsChecked = true; } else { fullboot.IsChecked = false; }
-                if (_nohacks == "1") { nohacks.IsChecked = true; } else { nohacks.IsChecked = false; }
-
-                //Reads PCSX2_vm file
-                var vmIni = new IniFile(_cfgDir + @"\PCSX2_vm.ini");
-                var _widescreen = vmIni.Read("EnableWideScreenPatches", "EmuCore");
-
-                //Sets the values from PCSX2_vm ini
-                if (_widescreen == "enabled") { widescreen.IsChecked = true; } else { widescreen.IsChecked = false; }
-
-                //GSdx ini settings
-                var gsdxIni = new IniFile(_cfgDir + @"\GSdx.ini");
-                var _shaderfx = gsdxIni.Read("shaderfx", "Settings");
-
-                if (_shaderfx == "1") { Shader_Checkbox.IsChecked = true; Shader_Button.IsEnabled = true; } else { Shader_Checkbox.IsChecked = false; Shader_Button.IsEnabled = false; }
-
-
-                //Reads the PCSX2_ui ini file
-                var uiIni = new IniFile(_cfgDir + @"\PCSX2_ui.ini");
-                var _zoom = uiIni.Read("Zoom", "GSWindow");
-                var _aspectratio = uiIni.Read("AspectRatio", "GSWindow");
-
-                //Read aspect ratio
-                //Create a list of all the aspect ratios and add them to aspectratio combobox
-                List<string> aspectRatios = new List<string>();
-                aspectRatios.Add("Letterbox");
-                aspectRatios.Add("Widescreen");
-                aspectRatios.Add("Stretched");
-                aspectratio.ItemsSource = aspectRatios;
-
-                if (_aspectratio == "4:3")
-                {
-                    aspectratio.SelectedIndex = 0;
-                }
-                else if (_aspectratio == "16:9")
-                {
-                    aspectratio.SelectedIndex = 1;
-                }
-                else
-                {
-                    aspectratio.SelectedIndex = 2;
-                }
-
-                //Set zoom level to textbox
-                zoom.Text = _zoom;
-
-                //Disable Input settings button if "Global Controller Profile" is enabled
-                if(Properties.Settings.Default.globalController)
-                {
-                    InputSettings_Button.IsEnabled = false;
-                }
-                else
-                {
-                    InputSettings_Button.IsEnabled = true;
-                }
+                GameSettingsPanel.DataContext = new GameSettingsViewModel(_name);
 
                 //Show the panel and overlay
                 Overlay(true);
                 GameSettings.Visibility = Visibility.Visible;
                 SlideInPanelAnimation();
 
-                //Set image and header text for the game
-                Header_title.Text = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(_name);
-
-                //Creates a bitmap stream
-                var artSource = new System.Windows.Media.Imaging.BitmapImage();
-
-                artSource.BeginInit();
-
-                //Fixes the caching issues, where cached copy would just hang around and bother me for two days
-                artSource.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.None;
-                artSource.UriCachePolicy = new RequestCachePolicy(RequestCacheLevel.BypassCache);
-                artSource.CreateOptions = System.Windows.Media.Imaging.BitmapCreateOptions.IgnoreImageCache;
-
-                artSource.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
-                artSource.UriSource = new Uri(@"resources\configs\" + _name + @"\art.jpg", UriKind.RelativeOrAbsolute);
-
-                artSource.EndInit();
-                GameSettings_Header.Source = artSource;
             }
             else
             {
@@ -394,12 +309,12 @@ namespace Spectabis_WPF.Views
         //Side panel sliding in animation, must be triggered after visiblity change
         public void SlideInPanelAnimation()
         {
+            Overlay(true);
             DoubleAnimation da = new DoubleAnimation();
             da.From = 0;
             da.To = PanelWidth;
             da.Duration = PanelSlideTime;
             GameSettings.BeginAnimation(System.Windows.Controls.Grid.WidthProperty, da);
-            
         }
 
         //Side Panel sliding out animation
@@ -417,57 +332,13 @@ namespace Spectabis_WPF.Views
         private void SlideOutPanelAnimation_Finished(object sender, EventArgs e)
         {
             GameSettings.Visibility = Visibility.Collapsed;
+            Overlay(false);
         }
 
         //Close Game Settings button click
-        private void CloseSettings_Button(object sender, RoutedEventArgs e)
+        public void CloseSettings_Button(object sender, RoutedEventArgs e)
         {
-            //Save settings, take name from header text
-            SaveGameSettings(Header_title.Text);
-
-            //Hide panel
-            Overlay(false);
-            Open_Settings(false);
-        }
-
-        //Change boxart
-        private void ChangeArt_Button(object sender, RoutedEventArgs e)
-        {
-            Ookii.Dialogs.Wpf.VistaOpenFileDialog artBrowser = new Ookii.Dialogs.Wpf.VistaOpenFileDialog();
-            artBrowser.Filter = "JPEG Files (*.jpg)|*.jpg|PNG Files (*.png)|*.png";
-            artBrowser.Title = "Browse to a new boxart image";
-
-            var browserResult = artBrowser.ShowDialog();
-            if(browserResult == true)
-            {
-                string _file = artBrowser.FileName;
-                string _game = Header_title.Text;
-
-                //Url files don't get filtered, so let's just not break the game profile and stop, if 
-                //selected file is indeed a url file
-                if(_file.Contains(".url"))
-                {
-                    Console.WriteLine("File was URL, returning.");
-                    return;
-                }
-
-                //Replace the boxart image
-                //refreshTile(null);
-                GameSettings_Header.Source = null;
-                File.Copy(_file, BaseDirectory + @"\resources\configs\" + _game + @"\art.jpg", true);
-
-                //Reload the image in header
-                var artSource = new System.Windows.Media.Imaging.BitmapImage();
-                artSource.BeginInit();
-                artSource.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.None;
-                artSource.UriCachePolicy = new RequestCachePolicy(RequestCacheLevel.BypassCache);
-                artSource.CreateOptions = System.Windows.Media.Imaging.BitmapCreateOptions.IgnoreImageCache;
-
-                artSource.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
-                artSource.UriSource = new Uri(BaseDirectory + @"\resources\configs\" + _game + @"\art.jpg");
-                artSource.EndInit();
-                GameSettings_Header.Source = artSource;
-            }
+            
         }
 
         public void reloadLibrary()
@@ -475,451 +346,15 @@ namespace Spectabis_WPF.Views
             mainFrame.NavigationService.Refresh();
         }
 
-        private void SaveGameSettings(string _name)
+        public void RenameTile(string _old, string _new)
         {
-            var game = Library.Games.FirstOrDefault(x => x.GameName == _name);
-            if (game == null)
-                return;
-
-            //Create instances for every ini file to save
-            var gameIni = new IniFile(BaseDirectory + @"\resources\configs\" + _name + @"\spectabis.ini");
-            var uiIni = new IniFile(BaseDirectory + @"\resources\configs\" + _name + @"\PCSX2_ui.ini");
-            var vmIni = new IniFile(BaseDirectory + @"\resources\configs\" + _name + @"\PCSX2_vm.ini");
-            var gsdxIni = new IniFile(BaseDirectory + @"\resources\configs\" + _name + @"\GSdx.ini");
-
-            //Emulation Settings - written to spectabis ini
-            if (nogui.IsChecked == true)
-            {
-                gameIni.Write("nogui", "1", "Spectabis");
-                
-            }
-            else
-            {
-                gameIni.Write("nogui", "0", "Spectabis");
-            }
-
-            if (fullscreen.IsChecked == true)
-            {
-                gameIni.Write("fullscreen", "1", "Spectabis");
-            }
-            else
-            {
-                gameIni.Write("fullscreen", "0", "Spectabis");
-            }
-
-            if (fullboot.IsChecked == true)
-            {
-                gameIni.Write("fullboot", "1", "Spectabis");
-            }
-            else
-            {
-                gameIni.Write("fullboot", "0", "Spectabis");
-            }
-
-            if (nohacks.IsChecked == true)
-            {
-                gameIni.Write("nohacks", "1", "Spectabis");
-            }
-            else
-            {
-                gameIni.Write("nohacks", "0", "Spectabis");
-            }
-
-            //Widescreen patch - written to pcsx2_vm
-            if (widescreen.IsChecked == true)
-            {
-                vmIni.Write("EnableWideScreenPatches", "enabled", "EmuCore");
-            }
-            else
-            {
-                vmIni.Write("EnableWideScreenPatches", "disabled", "EmuCore");
-            }
-
-            //Shader status - written to gsdx.ini
-            if (Shader_Checkbox.IsChecked == true)
-            {
-                gsdxIni.Write("shaderfx", "1", "Settings");
-                CopyShaders(_name);
-                WriteGSdxFX(_name);
-            }
-            else
-            {
-                gsdxIni.Write("shaderfx", "0", "Settings");
-            }
-
-            //Aspect ratio - written to PCSX2_ui ini
-            if(aspectratio.SelectedIndex == 0)
-            {
-                uiIni.Write("AspectRatio", "4:3", "GSWindow");
-            }
-            else if(aspectratio.SelectedIndex == 1)
-            {
-                uiIni.Write("AspectRatio", "16:9", "GSWindow");
-            }
-            else
-            {
-                uiIni.Write("AspectRatio", "Stretch", "GSWindow");
-            }
-
-            //Zoom level - writeen to PCSX2-ui ini
-            uiIni.Write("Zoom", zoom.Text, "GSWindow");
+            Library.ReloadGames();
         }
 
-        //Search PCSX2 wiki button
-        private void SearchWiki_Button(object sender, RoutedEventArgs e)
-        {
-            //Take the header title and replace spaces with + sign
-            string _query = Header_title.Text;
-            _query = _query.Replace(" - ", ":+");
-            _query = _query.Replace(" ", "+");
-            _query = _query.Replace("++",":+");
-
-            //Open up PCSX2 wiki
-            Process.Start(@"https://wiki.pcsx2.net/index.php?search=" + _query);
-        }
-
-        //shader config button
-        private void ShaderButton_Click(object sender, RoutedEventArgs e)
-        {
-            string currentGame = Header_title.Text;
-            string GSdxfx = BaseDirectory + @"resources\configs\" + currentGame + @"\GSdx.fx";
-            string GSdxfxini = BaseDirectory + @"resources\configs\" + currentGame + @"\GSdx_FX_Settings.ini";
-
-            if (File.Exists(BaseDirectory + @"resources\configs\" + currentGame + @"\GSdx.fx") == false)
-            {
-                CopyShaders(currentGame);
-            }
-
-            WriteGSdxFX(currentGame);
-
-            //open shader config file
-            Process.Start(GSdxfxini);
-        }
-
-        //Disable & enable configure shader button according to checkbox
-        private void Shader_Checkbox_Click(object sender, RoutedEventArgs e)
-        {
-            if(Shader_Checkbox.IsChecked == true)
-            {
-                Shader_Button.IsEnabled = true;
-            }
-            else
-            {
-                Shader_Button.IsEnabled = false;
-            }
-        }
-
-        //copy shader files from emulator directory to game profile
-        private void CopyShaders(string currentGame)
-        {
-            string GSdxfx = BaseDirectory + @"resources\configs\" + currentGame + @"\GSdx.fx";
-            string GSdxfxini = BaseDirectory + @"resources\configs\" + currentGame + @"\GSdx_FX_Settings.ini";
-
-            if(File.Exists(GSdxfx) == false)
-            {
-                var dir = Path.GetDirectoryName(Properties.Settings.Default.emuDir);
-                File.Copy(dir + @"\shaders\GSdx.fx", GSdxfx);
-                File.Copy(dir + @"\shaders\GSdx_FX_Settings.ini", GSdxfxini);
-            }
-        }
-
-        //Write shader file locations to GSdx ini
-        private void WriteGSdxFX(string currentGame)
-        {
-            string GSdxfx = BaseDirectory + @"resources\configs\" + currentGame + @"\GSdx.fx";
-            string GSdxfxini = BaseDirectory + @"resources\configs\" + currentGame + @"\GSdx_FX_Settings.ini";
-
-            var GSdx = new IniFile(BaseDirectory + @"\resources\configs\" + currentGame + @"\GSdx.ini");
-            GSdx.Write("shaderfx_glsl", GSdxfx, "Settings");
-            GSdx.Write("shaderfx_conf", GSdxfxini, "Settings");
-            Console.WriteLine("Shader files written to GSdx.ini");
-        }
-
-        //Imports GPUconfigure from GSdx plugin
-        //All GSdx plugins have same settings, by the looks of it
-        //It has no inputs, but writes/reads the ini files where .exe is located at folder /inis/
-        [DllImport(@"\plugins\GSdx32-SSE2.dll")]
-        static private extern void GSconfigure();
-
-        //Configuration must be closed so .dll is not in use
-        [DllImport(@"\plugins\GSdx32-SSE2.dll")]
-        static private extern void GSclose();
-
-        //Video Settings button
-        private void VideoSettings_click(object sender, RoutedEventArgs e)
-        {
-            //Set currentgame from header title text
-            string currentGame = Header_title.Text;
-
-            try
-            {
-                if (File.Exists(BaseDirectory + @"\resources\configs\" + currentGame + @"\GSdx.ini"))
-                {
-                    //Creates inis folder and copies it from game profile folder
-                    Directory.CreateDirectory(BaseDirectory + @"inis");
-                    File.Copy(BaseDirectory + @"\resources\configs\" + currentGame + @"\GSdx.ini", BaseDirectory + @"inis\GSdx.ini", true);
-                }
-                else
-                {
-                    Directory.CreateDirectory(BaseDirectory + @"inis");
-                    File.Create(BaseDirectory + @"inis\GSdx.ini");
-                }
-            }
-            catch(Exception ex)
-            {
-                var msg = "Unable to configure GSdx config file";
-                Logger.LogException(ex, msg);
-                PushSnackbar(msg);
-            }
-
-            try
-            {
-                //GPUConfigure(); - Only software mode was available
-                GSconfigure();
-                GSclose();
-
-                File.Copy(BaseDirectory + @"inis\GSdx.ini", BaseDirectory + @"\resources\configs\" + currentGame + @"\GSdx.ini", true);
-                Directory.Delete(BaseDirectory + @"inis", true);
-            }
-            catch(Exception ex)
-            {
-                var msg = "Unable to configure GSdx plugin";
-                Logger.LogException(ex, msg);
-                PushSnackbar(msg);
-            }
-        }
-
-        [DllImport(@"\plugins\Spu2-X.dll")]
-        static private extern void SPU2configure();
-
-        [DllImport(@"\plugins\Spu2-X.dll")]
-        static private extern void SPU2close();
-
-        //Audio Settings button
-        private void AudioSettings_click(object sender, RoutedEventArgs e)
-        {
-            string currentGame = Header_title.Text;
-
-            try
-            {
-                //Creates inis folder and copies it from game profile folder
-                Directory.CreateDirectory(BaseDirectory + @"inis");
-
-                var SPU2XConfigFile = BaseDirectory + @"\resources\configs\" + currentGame + @"\SPU2-X.ini";
-
-                if (File.Exists(SPU2XConfigFile))
-                {
-                    File.Copy(SPU2XConfigFile, BaseDirectory + @"inis\SPU2-X.ini", true);
-                }
-                else
-                {
-                    File.Create(BaseDirectory + @"inis\SPU2-X.ini");
-                }
-            }
-            catch(Exception ex)
-            {
-                var msg = "Could not configure SPU2-X config file";
-                Logger.LogException(ex, msg);
-                PushSnackbar(msg);
-            }
-
-            try
-            {
-                SPU2configure();
-                SPU2close();
-
-                File.Copy(BaseDirectory + @"inis\SPU2-X.ini", BaseDirectory + @"\resources\configs\" + currentGame + @"\SPU2-X.ini", true);
-                Directory.Delete(BaseDirectory + @"inis", true);
-            }
-            catch(Exception ex)
-            {
-                var msg = "Could not configure SPU2-X plugin";
-                Logger.LogException(ex, msg);
-                PushSnackbar(msg);
-            }
-        }
-
-
-        [DllImport(@"\plugins\LilyPad.dll")]
-        static private extern void PADconfigure();
-
-        //Configuration must be closed so .dll is not in use
-        [DllImport(@"\plugins\LilyPad.dll")]
-        static private extern void PADclose();
-
-        private void InputSettings_click(object sender, RoutedEventArgs e)
-        {
-            string currentGame = Header_title.Text;
-
-            try
-            {
-                //Copy the existing .ini file for editing if it exists
-                if (File.Exists(BaseDirectory + @"\resources\configs\" + currentGame + @"\LilyPad.ini"))
-                {
-                    //Creates inis folder and copies it from game profile folder
-                    Directory.CreateDirectory(BaseDirectory + @"inis");
-                    File.Copy(BaseDirectory + @"\resources\configs\" + currentGame + @"\LilyPad.ini", BaseDirectory + @"inis\LilyPad.ini", true);
-                }
-                else
-                {
-                    Directory.CreateDirectory(BaseDirectory + @"inis");
-                    File.Create(BaseDirectory + @"inis\LilyPad.ini");
-                }
-            }
-            catch(Exception ex)
-            {
-                var msg = "Could not configure LilyPad config file";
-                Logger.LogException(ex, msg);
-                PushSnackbar(msg);
-            }
-            
-            Console.WriteLine("Loading " + BaseDirectory + @"\resources\configs\" + currentGame + @"\LilyPad.ini");
-
-            try
-            {
-                //Calls the DLL configuration function
-                PADconfigure();
-
-                //Calls the configration close function
-                PADclose();
-
-                //Copies the modified file into the game profile & deletes the created folder
-                File.Copy(BaseDirectory + @"inis\LilyPad.ini", BaseDirectory + @"\resources\configs\" + currentGame + @"\LilyPad.ini", true);
-                Directory.Delete(BaseDirectory + @"inis", true);
-            }
-            catch (Exception ex)
-            {
-                var msg = "Could not configure LilyPad plugin";
-                Logger.LogException(ex, msg);
-                PushSnackbar(msg);
-            }
-            
-
-            Console.WriteLine("Saving to " + BaseDirectory + @"\resources\configs\" + currentGame + @"\LilyPad.ini");
-        }
-
-        //Public timer, because it needs to stop itself
-        public DispatcherTimer timeTimer = new DispatcherTimer();
-
-        //Because labels don't support Click, i'll have to do it on my own
-        private void Header_title_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            Console.WriteLine("Clicked on game header!");
-
-            int TimeBetweenClicks = System.Windows.Forms.SystemInformation.DoubleClickTime;
-
-            //If the timer is not yet stopped, that means it's a double click
-            //If the timer is not running, it's not a double click
-            if (timeTimer.IsEnabled)
-            {
-                //Hide the real title label
-                Header_title.Visibility = Visibility.Collapsed;
-
-                //Set text from label and make the textbox visible
-                TitleEditBox.Text = Header_title.Text;
-                TitleEditBox.Visibility = Visibility.Visible;
-
-                //Set focus to this textbox
-                TitleEditBox.Focus();
-                TitleEditBox.CaretIndex = TitleEditBox.Text.Length;
-            }
-            else
-            {
-                //Starts the timer, with system double click time as interval (500ms for me)
-                timeTimer.Interval = new TimeSpan(0, 0, 0, 0, TimeBetweenClicks);
-                timeTimer.Tick += timeTimer_Tick;
-                timeTimer.Start();
-
-                Console.WriteLine("Started timer - after ms" + TimeBetweenClicks);
-            }
-        }
-
-        //Stop double-click timer on first tick
-        private void timeTimer_Tick(object sender, EventArgs e)
-        {
-            Console.WriteLine("Tick!");
-            timeTimer.Stop();
-        }
-
-        //When created textbox loeses focus, show the real label and don't save changes
-        private void TitleEditBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            //Hide the textbox
-            TitleEditBox.Visibility = Visibility.Collapsed;
-
-            //Show real label
-            Header_title.Visibility = Visibility.Visible;
-        }
-
-        //Catch created textbox key presses
-        private void TitleEditBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            List<string> chars = new List<string>();
-            //Remove unsupported characters
-            {
-                var tempText = TitleEditBox.Text;
-                foreach (var illegal in new[] { "/", "\\", ":", "|", "*", "<", ">" })
-                    tempText = tempText.Replace(illegal, string.Empty);
-                TitleEditBox.Text = tempText;
-            }
-
-            Console.WriteLine(e.Key.ToString());
-
-            //This is the only way to save the name
-            if (e.Key == Key.Enter)
-            {
-
-                //Save old name to a variable
-                string _oldName = Header_title.Text;
-                string _newName;
-
-                //Hide the textbox
-                TitleEditBox.Visibility = Visibility.Collapsed;
-
-                //Pass text to label
-                Header_title.Text = TitleEditBox.Text;
-
-                //Show real label
-                Header_title.Visibility = Visibility.Visible;
-
-                //Save new name to the variable
-                _newName = Header_title.Text;
-
-                //Check, if old directory exists
-                if(Directory.Exists(BaseDirectory + @"\resources\configs\" + _oldName))
-                {
-                    try
-                    {
-                        //Move old folder to new folder
-                        GameProfile.Rename(_oldName, _newName);
-                        
-                        //Rename game tile
-                        renameTile(_oldName, _newName);
-
-                        Console.WriteLine($"Renamed profile '{_oldName}' to '{_newName}'");
-                    }
-                    catch(Exception ex)
-                    {
-                        Console.WriteLine("Couldn't rename the folder");
-                        Console.WriteLine(ex);
-                    }
-                }
-            }
-
-            if (e.Key == Key.Escape)
-            {
-                //Hide the textbox
-                TitleEditBox.Visibility = Visibility.Collapsed;
-
-                //Show real label
-                Header_title.Visibility = Visibility.Visible;
-            }
-        }
-
-        private void renameTile(string _old, string _new)
-        {
-            //this.Invoke(new Action(() => ((Library)mainFrame.Content).renameTile(_old, _new)));
-        }
+        public void RefreshGameArt(string game)
+		{
+            Library.ReloadGames();
+		}
 
         private void Menu_Themes_Click(object sender, RoutedEventArgs e)
         {
@@ -1042,7 +477,7 @@ namespace Spectabis_WPF.Views
             Dispatcher.Invoke(new Action(() => PushSnackbar("Happy April Fools' Day! Pre-order 'Horse Armor DLC' now! ")));
 
             //Don't show this message again
-            Properties.Settings.Default.aprilfooled = true;
+            Properties.Settings.Default.Aprilfooled = true;
             Properties.Settings.Default.Save();
         }
 
@@ -1150,14 +585,16 @@ namespace Spectabis_WPF.Views
             {
                 Console.WriteLine("Adding " + game);
 
-                if (Properties.Settings.Default.titleAsFile)
+                if (Properties.Settings.Default.TitleAsFile)
                 {
-                    Library.AddGame(null, game, Path.GetFileNameWithoutExtension(game));
+                    GameProfile.Create(null, game, Path.GetFileNameWithoutExtension(game));
                 }
                 else
                 {
-                    Library.AddGame(null, game, GetGameName.GetName(game));
+                    GameProfile.Create(null, game, GetGameName.GetName(game));
                 }
+
+                Library.ReloadGames();
             }
         }
     }

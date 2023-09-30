@@ -167,7 +167,7 @@ namespace Spectabis_WPF.ViewModels
 			this.library = library;
 			GameName = gameName;
 
-			if (Properties.Settings.Default.playtime == true)
+			if (Properties.Settings.Default.Playtime == true)
 			{
 				IniFile spectabis = new IniFile($"{gameConfigs}//{gameName}//spectabis.ini");
 				string minutes = spectabis.Read("playtime", "Spectabis");
@@ -261,7 +261,7 @@ namespace Spectabis_WPF.ViewModels
 		{
 			//Start PCSX2 only with --cfgpath
 			string _cfgDir = gameConfigs + @"/" + GameName;
-			Process.Start(Properties.Settings.Default.emuDir, " --cfgpath=\"" + _cfgDir + "\"");
+			Process.Start(Properties.Settings.Default.EmuExePath, " --cfgpath=\"" + _cfgDir + "\"");
 		}
 
 		private void SpectabisConfig()

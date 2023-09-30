@@ -9,40 +9,34 @@ namespace Spectabis_WPF.Domain
     {
         public static Process CreateGameProcess(string game, bool launchAndTerminate = false)
         {
-            string BaseDirectory = App.BaseDirectory;
-            string gamePath = $"{BaseDirectory}resources\\configs\\{game}";
+            GameConfig config = SpectabisConfig.ReadConfig(game);
             
-            var _gameIni = new IniFile(gamePath + @"\spectabis.ini");
-            var _isoDir = _gameIni.Read("isoDirectory", "Spectabis");
-
-            //Launch arguments
-            var _nogui = _gameIni.Read("nogui", "Spectabis");
-            var _fullscreen = _gameIni.Read("fullscreen", "Spectabis");
-            var _fullboot = _gameIni.Read("fullboot", "Spectabis");
-            var _nohacks = _gameIni.Read("nohacks", "Spectabis");
-
             string _launchargs = "";
 
-            if (_nogui == "1") { _launchargs = "--nogui "; }
-            if (_fullscreen == "1") { _launchargs = _launchargs + "--fullscreen "; }
-            if (_fullboot == "1") { _launchargs = _launchargs + "--fullboot "; }
-            if (_nohacks == "1") { _launchargs = _launchargs + "--nohacks "; }
+            if (config.NoGui)
+                _launchargs = "--nogui ";
+            if (config.Fullscreen)
+                _launchargs += "--fullscreen ";
+            if (config.Fullboot)
+                _launchargs += "--fullboot ";
+            if (config.NoHacks)
+                _launchargs += "--nohacks ";
 
-            Console.WriteLine($"{_launchargs} {_isoDir} --cfgpath={gamePath}");
+            Console.WriteLine($"{_launchargs} {config.IsoPath} --cfgpath={SpectabisFilePath.GetGameConfigDirectoryPath(game)}");
 
             Process PCSX = new Process();
 
             //PCSX2 Process
-            if(File.Exists(Properties.Settings.Default.emuDir))
+            if(File.Exists(Properties.Settings.Default.EmuExePath))
             {
-                var argument = $"{_launchargs} \"{_isoDir}\" --cfgpath=\"{gamePath}\"";
+                var argument = $"{_launchargs} \"{config.IsoPath}\" --cfgpath=\"{SpectabisFilePath.GetGameConfigDirectoryPath(game)}\"";
 
-                if(_isoDir.EndsWith(".ELF") || _isoDir.EndsWith(".elf"))
+                if(config.IsoPath.EndsWith(".ELF") || config.IsoPath.EndsWith(".elf"))
                 {
-                    argument = $"--elf=\"{_isoDir}\" --cfgpath=\"{gamePath}\"";
+                    argument = $"--elf=\"{config.IsoPath}\" --cfgpath=\"{SpectabisFilePath.GetGameConfigDirectoryPath(game)}\"";
                 }
 
-                PCSX.StartInfo.FileName = Properties.Settings.Default.emuDir;
+                PCSX.StartInfo.FileName = Properties.Settings.Default.EmuExePath;
                 PCSX.StartInfo.Arguments = argument;
 
                 if(launchAndTerminate)
@@ -54,7 +48,7 @@ namespace Spectabis_WPF.Domain
             }
             else
             {
-                Console.WriteLine(Properties.Settings.Default.emuDir + " does not exist!");
+                Console.WriteLine(Properties.Settings.Default.EmuExePath + " does not exist!");
             }
 
             return PCSX;
@@ -63,10 +57,8 @@ namespace Spectabis_WPF.Domain
         public static Process CreateFirstTimeWizard()
         {
             var process = new Process();
-            process.StartInfo.FileName = Properties.Settings.Default.emuDir;
-
-            string cfgPath = $"{App.BaseDirectory}resources\\default_config";
-            process.StartInfo.Arguments = $"--forcewiz --nogui --cfgpath=\"{cfgPath}\"";
+            process.StartInfo.FileName = Properties.Settings.Default.EmuExePath;
+            process.StartInfo.Arguments = $"--forcewiz --nogui --cfgpath=\"{SpectabisFilePath.DefaultConfigDirectoryPath}\"";
 
             return process;
         }

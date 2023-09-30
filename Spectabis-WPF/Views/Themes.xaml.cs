@@ -139,13 +139,13 @@ namespace Spectabis_WPF.Views
             string SwatchName = Convert.ToString(((Button)sender).Tag);
 
             // Save swatch to settings
-            Properties.Settings.Default.swatch = SwatchName;
+            Properties.Settings.Default.Swatch = SwatchName;
             Properties.Settings.Default.Save();
 
             //Create a card from button's tag
             SetPrimary(SwatchName);
 
-            Console.WriteLine("Swatch saved - " + Properties.Settings.Default.swatch);
+            Console.WriteLine("Swatch saved - " + Properties.Settings.Default.Swatch);
         }
     }
 }

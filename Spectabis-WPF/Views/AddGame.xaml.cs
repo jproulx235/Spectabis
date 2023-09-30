@@ -65,7 +65,7 @@ namespace Spectabis_WPF.Views
 
             if (ISODialog.ShowDialog().Value == true)
             {
-                if(Properties.Settings.Default.titleAsFile)
+                if(Properties.Settings.Default.TitleAsFile)
                 {
                     title = Path.GetFileNameWithoutExtension(ISODialog.FileName);
                 }
@@ -83,7 +83,7 @@ namespace Spectabis_WPF.Views
 
                 Name_Textbox.Text = title;
 
-                if(Properties.Settings.Default.autoBoxart == true)
+                if(Properties.Settings.Default.AutoBoxart == true)
                 {
 
                     ProgressBar.Visibility = Visibility.Visible;

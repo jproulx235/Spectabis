@@ -303,10 +303,14 @@
     <Compile Include="Domain\Scraping\ScrapeSource.cs" />
     <Compile Include="Domain\Scraping\Api\TheGamesDbApi.cs" />
     <Compile Include="Domain\Scraping\SecureTLS.cs" />
+    <Compile Include="Domain\SpectabisConfig.cs" />
+    <Compile Include="Domain\SpectabisFilePath.cs" />
     <Compile Include="Domain\StringExtensions.cs" />
     <Compile Include="Domain\SupportedGames.cs" />
     <Compile Include="Domain\UpdateCheck.cs" />
+    <Compile Include="Enums\AspectRatio.cs" />
     <Compile Include="Properties\Settings.cs" />
+    <Compile Include="ViewModels\GameSettingsViewModel.cs" />
     <Compile Include="ViewModels\LibraryGameViewModel.cs" />
     <Compile Include="ViewModels\LibraryViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
@@ -321,6 +325,9 @@
     </Compile>
     <Compile Include="Views\GameDiscovery.xaml.cs">
       <DependentUpon>GameDiscovery.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\GameSettings.xaml.cs">
+      <DependentUpon>GameSettings.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
@@ -341,6 +348,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\GameDiscovery.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\GameSettings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

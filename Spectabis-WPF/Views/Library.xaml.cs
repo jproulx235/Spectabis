@@ -27,7 +27,7 @@ namespace Spectabis_WPF.Views
         private LibraryViewModel vm;
 
         //Spectabis Variables
-        public static string emuDir => Properties.Settings.Default.emuDir;
+        public static string emuDir => Properties.Settings.Default.EmuExePath;
 
         private string BaseDirectory = App.BaseDirectory;
 
@@ -85,19 +85,21 @@ namespace Spectabis_WPF.Views
                     //If file supports name scrapping
                     if (SupportedGames.ScrappingFiles.Any(s => file.EndsWith(s)))
                     {
-                        if(Properties.Settings.Default.titleAsFile)
+                        if(Properties.Settings.Default.TitleAsFile)
                         {
-                            vm.AddGame(null, file, Path.GetFileNameWithoutExtension(file));
+                            GameProfile.Create(null, file, Path.GetFileNameWithoutExtension(file));
                         }
                         else
                         {
-                            vm.AddGame(null, file, GetGameName.GetName(file));
+                            GameProfile.Create(null, file, GetGameName.GetName(file));
                         }
+
+                        
                     }
                     else
                     {
                         ((MainWindow)Application.Current.MainWindow).PushSnackbar("This filetype doesn't support automatic boxart!");
-                        vm.AddGame(null, file, Path.GetFileNameWithoutExtension(file));
+                        GameProfile.Create(null, file, Path.GetFileNameWithoutExtension(file));
                     }
                 }
                 else
@@ -106,6 +108,7 @@ namespace Spectabis_WPF.Views
                 }
             }
 
+            vm.ReloadGames();
         }
 
         [DllImport(@"\plugins\LilyPad.dll")]
@@ -298,7 +301,7 @@ namespace Spectabis_WPF.Views
 
 		private void GlobalController_Button_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
 		{
-            if (Properties.Settings.Default.globalController)
+            if (Properties.Settings.Default.GlobalController)
             {
                 string globalProfile = BaseDirectory + @"resources\configs\#global_controller\LilyPad.ini";
                 string inisTemp = BaseDirectory + @"inis\LilyPad.ini";

@@ -45,7 +45,7 @@ namespace Spectabis_WPF.ViewModels
 			set
 			{
 				showTitles = value;
-				Properties.Settings.Default.showTitle = value;
+				Properties.Settings.Default.ShowTitle = value;
 				Properties.Settings.Default.Save();
 				OnPropertyChanged(nameof(ShowTitles));
 			}
@@ -57,7 +57,7 @@ namespace Spectabis_WPF.ViewModels
 			set
 			{
 				darkMode = value;
-				Properties.Settings.Default.nightMode = value;
+				Properties.Settings.Default.NightMode = value;
 				Properties.Settings.Default.Save();
 				new PaletteHelper().SetLightDark(value);
 				OnPropertyChanged(nameof(DarkMode));
@@ -70,7 +70,7 @@ namespace Spectabis_WPF.ViewModels
 			set
 			{
 				autoScraping = value;
-				Properties.Settings.Default.autoBoxart = value;
+				Properties.Settings.Default.AutoBoxart = value;
 				Properties.Settings.Default.Save();
 				OnPropertyChanged(nameof(AutoScraping));
 			}
@@ -82,7 +82,7 @@ namespace Spectabis_WPF.ViewModels
 			set
 			{
 				showSearchBar = value;
-				Properties.Settings.Default.searchbar = value;
+				Properties.Settings.Default.Searchbar = value;
 				Properties.Settings.Default.Save();
 				OnPropertyChanged(nameof(ShowSearchBar));
 			}
@@ -94,7 +94,7 @@ namespace Spectabis_WPF.ViewModels
 			set
 			{
 				tooltips = value;
-				Properties.Settings.Default.tooltips = value;
+				Properties.Settings.Default.Tooltips = value;
 				Properties.Settings.Default.Save();
 				OnPropertyChanged(nameof(ShowTooltips));
 			}
@@ -106,7 +106,7 @@ namespace Spectabis_WPF.ViewModels
 			set
 			{
 				checkUpdates = value;
-				Properties.Settings.Default.checkupdates = value;
+				Properties.Settings.Default.Checkupdates = value;
 				Properties.Settings.Default.Save();
 				OnPropertyChanged(nameof(CheckUpdates));
 			}
@@ -118,7 +118,7 @@ namespace Spectabis_WPF.ViewModels
 			set
 			{
 				titleAsFile = value;
-				Properties.Settings.Default.titleAsFile = value;
+				Properties.Settings.Default.TitleAsFile = value;
 				Properties.Settings.Default.Save();
 				OnPropertyChanged(nameof(TitleAsFile));
 			}
@@ -130,7 +130,7 @@ namespace Spectabis_WPF.ViewModels
 			set
 			{
 				showPlaytime = value;
-				Properties.Settings.Default.playtime = value;
+				Properties.Settings.Default.Playtime = value;
 				Properties.Settings.Default.Save();
 				OnPropertyChanged(nameof(ShowPlaytime));
 			}
@@ -152,7 +152,7 @@ namespace Spectabis_WPF.ViewModels
 			set
 			{
 				emuDir = value;
-				Properties.Settings.Default.emuDir = value;
+				Properties.Settings.Default.EmuExePath = value;
 				Properties.Settings.Default.Save();
 				OnPropertyChanged(nameof(EmuDir));
 			}
@@ -185,15 +185,15 @@ namespace Spectabis_WPF.ViewModels
 			ApiItems = new List<ApiItem>();
 
 			// Set the private properrties so we don't trigger the saving
-			showTitles = Properties.Settings.Default.showTitle;
-			darkMode = Properties.Settings.Default.nightMode;
-			autoScraping = Properties.Settings.Default.autoBoxart;
-			showSearchBar = Properties.Settings.Default.searchbar;
-			tooltips = Properties.Settings.Default.tooltips;
-			checkUpdates = Properties.Settings.Default.checkupdates;
-			titleAsFile = Properties.Settings.Default.titleAsFile;
-			showPlaytime = Properties.Settings.Default.playtime;
-			emuDir = Properties.Settings.Default.emuDir;
+			showTitles = Properties.Settings.Default.ShowTitle;
+			darkMode = Properties.Settings.Default.NightMode;
+			autoScraping = Properties.Settings.Default.AutoBoxart;
+			showSearchBar = Properties.Settings.Default.Searchbar;
+			tooltips = Properties.Settings.Default.Tooltips;
+			checkUpdates = Properties.Settings.Default.Checkupdates;
+			titleAsFile = Properties.Settings.Default.TitleAsFile;
+			showPlaytime = Properties.Settings.Default.Playtime;
+			emuDir = Properties.Settings.Default.EmuExePath;
 
 			var getProp = new Func<string, PropertyInfo>(p => typeof(Properties.Settings).GetProperty(p));
 			var apiList = new List<ApiItem>{

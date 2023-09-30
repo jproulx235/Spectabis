@@ -1,22 +1,18 @@
-﻿using System;
+﻿using Spectabis_WPF.Enums;
+using System;
 using System.IO;
 
 namespace Spectabis_WPF.Domain
 {
-    class GameProfile
+    public static class GameProfile
     {
-        private static string BaseDirectory = App.BaseDirectory;
-        public static string emuDir { get { return Path.GetDirectoryName(Properties.Settings.Default.emuDir); } }
-        private static int index = 0;
-        private static string GlobalController = BaseDirectory + @"resources\configs\#global_controller\LilyPad.ini";
-
         //Creates a folder and a blank file for Global Controller settings
         public static void CreateGlobalController()
         {
-            if (File.Exists(GlobalController) == false)
+            if (File.Exists(SpectabisFilePath.GlobalControllerLilyPadIniFilePath) == false)
             {
-                Directory.CreateDirectory(BaseDirectory + @"resources\configs\#global_controller\");
-                File.Create(GlobalController);
+                Directory.CreateDirectory(SpectabisFilePath.GlobalControllerDirectoryPath);
+                File.Create(SpectabisFilePath.GlobalControllerLilyPadIniFilePath);
                 Console.WriteLine("Created global controller profile file");
             }
         }
@@ -24,10 +20,10 @@ namespace Spectabis_WPF.Domain
         //Copy global controller profile to a game profile
         public static void CopyGlobalProfile(string game)
         {
-            if(Properties.Settings.Default.globalController == true)
+            if(Properties.Settings.Default.GlobalController == true)
             {
                 Console.WriteLine("Global settings copied to " + game);
-                File.Copy(GlobalController, BaseDirectory + @"\resources\configs\" + game + @"\LilyPad.ini", true);
+                File.Copy(SpectabisFilePath.GlobalControllerLilyPadIniFilePath, SpectabisFilePath.GetGameLilyPadSettingsIniFilePath(game), true);
             }
             else
             {
@@ -43,23 +39,22 @@ namespace Spectabis_WPF.Domain
             _title = _title.ToSanitizedString();
 
             //Create a folder for profile and add an index, if needed
-            if (getIndex(BaseDirectory + @"\resources\configs\" + _title) != 0)
+            if (getIndex(SpectabisFilePath.GetGameConfigDirectoryPath(_title)) != 0)
             {
-                _title = _title + " (" + index + ")";
+                _title = _title + " (" + getIndex(SpectabisFilePath.GetGameConfigDirectoryPath(_title)) + ")";
             }
 
-            Directory.CreateDirectory(BaseDirectory + @"\resources\configs\" + _title);
+            Directory.CreateDirectory(SpectabisFilePath.GetGameConfigDirectoryPath(_title));
 
-            string defaultConfig = $"{App.BaseDirectory}resources\\default_config";
-            if (Directory.Exists(defaultConfig))
+            if (Directory.Exists(SpectabisFilePath.DefaultConfigDirectoryPath))
             {
                 Console.WriteLine("Copying initial game configuration from default_config");
 
-                string[] files = Directory.GetFiles(defaultConfig);
+                string[] files = Directory.GetFiles(SpectabisFilePath.DefaultConfigDirectoryPath);
 
                 foreach(var file in files)
                 {
-                    string _destinationPath = Path.Combine(BaseDirectory + @"\resources\configs\" + _title + @"\" + Path.GetFileName(file));
+                    string _destinationPath = Path.Combine(SpectabisFilePath.GetGameConfigDirectoryPath(_title), Path.GetFileName(file));
                     File.Copy(file, _destinationPath);
                 }
             }
@@ -67,15 +62,15 @@ namespace Spectabis_WPF.Domain
             {
                 Console.WriteLine("Using legacy game configuration");
 
-                if (Directory.Exists(emuDir + @"\inis\"))
+                if (Directory.Exists(Properties.Settings.Default.EmuDir + @"\inis\"))
                 {
-                    string[] inisDir = Directory.GetFiles(emuDir + @"\inis\");
+                    string[] inisDir = Directory.GetFiles(Properties.Settings.Default.EmuDir + @"\inis\");
                     foreach (string inifile in inisDir)
                     {
                         Console.WriteLine(inifile + " found!");
-                        if (File.Exists(BaseDirectory + @"\resources\configs\" + _title + @"\" + Path.GetFileName(inifile)) == false)
+                        if (File.Exists(Path.Combine(SpectabisFilePath.GetGameConfigDirectoryPath(_title), Path.GetFileName(inifile))) == false)
                         {
-                            string _destinationPath = Path.Combine(BaseDirectory + @"\resources\configs\" + _title + @"\" + Path.GetFileName(inifile));
+                            string _destinationPath = Path.Combine(SpectabisFilePath.GetGameConfigDirectoryPath(_title), Path.GetFileName(inifile));
                             File.Copy(inifile, _destinationPath);
                         }
                     }
@@ -85,9 +80,9 @@ namespace Spectabis_WPF.Domain
                     string[] inisDirDoc = Directory.GetFiles((Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\PCSX2\inis"));
                     foreach (string inifile in inisDirDoc)
                     {
-                        if (File.Exists(BaseDirectory + @"\resources\configs\" + _title + @"\" + Path.GetFileName(inifile)) == false)
+                        if (!File.Exists(Path.Combine(SpectabisFilePath.GetGameConfigDirectoryPath(_title), Path.GetFileName(inifile))))
                         {
-                            string _destinationPath = Path.Combine(BaseDirectory + @"\resources\configs\" + _title + @"\" + Path.GetFileName(inifile));
+                            string _destinationPath = Path.Combine(SpectabisFilePath.GetGameConfigDirectoryPath(_title), Path.GetFileName(inifile));
                             File.Copy(inifile, _destinationPath);
                         }
                     }
@@ -95,25 +90,31 @@ namespace Spectabis_WPF.Domain
                 }
             }
 
+            GameConfig config = new GameConfig
+            {
+                GameName = _title,
+                IsoPath = _isoDir,
+                NoGui = true,
+                Fullscreen = true,
+                Fullboot = true,
+                NoHacks = true,
+                Widescreen = false,
+                Zoom = 100,
+                AspectRatio = AspectRatio.wide_16_9,
+                CustomShaders = false
+            };
 
-            //Create a blank Spectabis.ini file
-            var gameIni = new IniFile(BaseDirectory + @"\resources\configs\" + _title + @"\spectabis.ini");
-            gameIni.Write("isoDirectory", _isoDir, "Spectabis");
-            gameIni.Write("nogui", "0", "Spectabis");
-            gameIni.Write("fullscreen", "0", "Spectabis");
-            gameIni.Write("fullboot", "0", "Spectabis");
-            gameIni.Write("nohacks", "0", "Spectabis");
-
+            SpectabisConfig.SaveConfig(config);
             
             if(_img == null || File.Exists(_img))
             {
                 //Copy tempart from resources
-                Properties.Resources.tempArt.Save(BaseDirectory + @"\resources\_temp\art.jpg");
-                File.Copy(BaseDirectory + @"\resources\_temp\art.jpg", BaseDirectory + @"\resources\configs\" + _title + @"\art.jpg", true);
+                Properties.Resources.tempArt.Save(SpectabisFilePath.PlaceholderBoxArtFilePath);
+                File.Copy(SpectabisFilePath.PlaceholderBoxArtFilePath, SpectabisFilePath.GetGameBoxArtFilePath(_title), true);
             }
             else
             {
-                File.Copy(_img, BaseDirectory + @"\resources\configs\" + _title + @"\art.jpg", true);
+                File.Copy(_img, SpectabisFilePath.GetGameBoxArtFilePath(_title), true);
             }
             
             return _title;
@@ -122,25 +123,25 @@ namespace Spectabis_WPF.Domain
 
         public static void Delete(string _title)
         {
-            if(isFolder(BaseDirectory + @"\resources\configs\" + _title))
+            if(Directory.Exists(SpectabisFilePath.GetGameConfigDirectoryPath(_title)))
             {
-                Directory.Delete(BaseDirectory + @"\resources\configs\" + _title, true);
+                Directory.Delete(SpectabisFilePath.GetGameConfigDirectoryPath(_title), true);
             }
         }
 
         public static string Rename(string _in, string _out)
         {
 
-            string input = BaseDirectory + @"\resources\configs\" + _in;
-            string output = BaseDirectory + @"\resources\configs\" + _out;
+            string input = SpectabisFilePath.GetGameConfigDirectoryPath(_in);
+            string output = SpectabisFilePath.GetGameConfigDirectoryPath(_out);
 
-            if (isFolder(input))
+            if (Directory.Exists(input))
             {
                 if (getIndex(output) != 0)
                 {
-                    output = output + " (" + index + ")";
+                    output = output + " (" + getIndex(output) + ")";
                     Directory.Move(input, output);
-                    return _out + " (" + index + ")";
+                    return _out + " (" + getIndex(output) + ")";
                 }
 
                 Directory.Move(input, output);
@@ -151,24 +152,9 @@ namespace Spectabis_WPF.Domain
             return null;
         }
 
-        //--
-
-        //No idea why i did this
-        private static bool isFolder(string _dir)
-        {
-            if(Directory.Exists(_dir))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
         private static int getIndex(string _dir)
         {
-            index = 0;
+            var index = 0;
 
             //Enumerate folder index
             a: if (Directory.Exists(_dir))

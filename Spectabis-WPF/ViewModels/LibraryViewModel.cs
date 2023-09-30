@@ -20,7 +20,6 @@ namespace Spectabis_WPF.ViewModels
 	public class LibraryViewModel : INotifyPropertyChanged
 	{
         private MainWindow mainWindow;
-        private string GameConfigs = App.BaseDirectory + @"\resources\configs\";
         private List<string> LoadedISOs = new List<string>();
         private List<LibraryGameViewModel> games;
         private PackIconKind controllerIcon;
@@ -203,7 +202,7 @@ namespace Spectabis_WPF.ViewModels
             mainWindow = Application.Current.MainWindow as MainWindow;
 
             //Hide searchbar
-            if (Properties.Settings.Default.searchbar == false)
+            if (Properties.Settings.Default.Searchbar == false)
             {
                 SearchVisibility = Visibility.Collapsed;
             }
@@ -214,7 +213,7 @@ namespace Spectabis_WPF.ViewModels
             ScanGameDirectory();
 
             //Set appropriate menu icon for global controller settings
-            setGlobalControllerIcon(Properties.Settings.Default.globalController);
+            setGlobalControllerIcon(Properties.Settings.Default.GlobalController);
 
             GameListVisibility = Visibility.Visible;
             GameGridVisibility = Visibility.Collapsed;
@@ -241,7 +240,7 @@ namespace Spectabis_WPF.ViewModels
             List<string> gameList = new List<string>();
 
             //Get all directories in Spectabis config folder
-            string[] _gamesdir = Directory.GetDirectories(GameConfigs);
+            string[] _gamesdir = Directory.GetDirectories(SpectabisFilePath.ConfigDirectoryPath);
 
             //Scan each game for Spectabis.ini
             foreach (var game in _gamesdir)
@@ -259,30 +258,30 @@ namespace Spectabis_WPF.ViewModels
 
         private void ScanGameDirectory()
         {
-            if (Properties.Settings.Default.gameDirectory != null)
+            if (Properties.Settings.Default.GameDirectory != null)
             {
                 //If game directory doesn't exist, stop and remove it from variable
-                if (Directory.Exists(Properties.Settings.Default.gameDirectory) == false)
+                if (Directory.Exists(Properties.Settings.Default.GameDirectory) == false)
                 {
                     mainWindow.PushSnackbar("Game Directory doesn't exist anymore!");
-                    Properties.Settings.Default.gameDirectory = null;
+                    Properties.Settings.Default.GameDirectory = null;
                     Properties.Settings.Default.Save();
                 }
 
                 //List of all files that don't contain already loaded files
-                if (Properties.Settings.Default.gameDirectory == null)
+                if (Properties.Settings.Default.GameDirectory == null)
                     return;
 
                 string[] _fileList;
 
                 try
                 {
-                    _fileList = Directory.GetFiles(Properties.Settings.Default.gameDirectory, "*.???", SearchOption.AllDirectories);
+                    _fileList = Directory.GetFiles(Properties.Settings.Default.GameDirectory, "*.???", SearchOption.AllDirectories);
                     Console.WriteLine(_fileList.Count() + " files found!");
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine($"Failed to enumerate game directory - '{Properties.Settings.Default.gameDirectory}'");
+                    Console.WriteLine($"Failed to enumerate game directory - '{Properties.Settings.Default.GameDirectory}'");
                     ((MainWindow)Application.Current.MainWindow).PushSnackbar("Failed to enumerate game file directory! Try selecting a different folder.");
                     return;
                 }
@@ -359,13 +358,13 @@ namespace Spectabis_WPF.ViewModels
                 Console.WriteLine("Turning on Global Controller settings");
                 GameProfile.CreateGlobalController();
                 setGlobalControllerIcon(true);
-                Properties.Settings.Default.globalController = true;
+                Properties.Settings.Default.GlobalController = true;
             }
             else if (GlobalControllerIcon == PackIconKind.XboxController)
             {
                 Console.WriteLine("Turning off Global Controller settings");
                 setGlobalControllerIcon(false);
-                Properties.Settings.Default.globalController = false;
+                Properties.Settings.Default.GlobalController = false;
             }
 
             Properties.Settings.Default.Save();
@@ -390,10 +389,10 @@ namespace Spectabis_WPF.ViewModels
         {
             Games = new List<LibraryGameViewModel>();
 
-            if (Directory.Exists(GameConfigs))
+            if (Directory.Exists(SpectabisFilePath.ConfigDirectoryPath))
             {
                 //Makes a collection of game folders from game config directory
-                string[] _gamesdir = Directory.GetDirectories(GameConfigs);
+                string[] _gamesdir = Directory.GetDirectories(SpectabisFilePath.ConfigDirectoryPath);
 
                 //Loops through each folder in game config directory
                 foreach (string game in _gamesdir)
@@ -401,115 +400,19 @@ namespace Spectabis_WPF.ViewModels
                     //Loads only games that contain query string
                     if (game.ToLower().Contains(query.ToLower()))
 
-                        if (File.Exists(game + @"\Spectabis.ini"))
-                        {
-                            //Sets _gameName to name of the folder
-                            string _gameName = game.Remove(0, game.LastIndexOf(Path.DirectorySeparatorChar) + 1);
-
-                            Games.Add(new LibraryGameViewModel(_gameName, this));
-                            NoGameVisibility = Visibility.Collapsed;
-                        }
-                }
-            }
-
-            Directory.CreateDirectory(GameConfigs);
-        }
-
-        public void AddGame(string _img, string _isoDir, string _title)
-        {
-            Console.WriteLine($"Title: {_title}");
-            _title = _title.ToSanitizedString();
-            Console.WriteLine($"Sanitized: {_title}");
-
-            //Checks, if the game profile already exists
-            if (Directory.Exists(App.BaseDirectory + @"\resources\configs\" + _title))
-            {
-                if (File.Exists(App.BaseDirectory + @"\resources\configs\" + _title + @"\Spectabis.ini"))
-                {
-                    mainWindow.PushSnackbar("Game Profile already exists!");
-                    return;
-                }
-            }
-
-            //Create a folder for game profile
-            Directory.CreateDirectory(App.BaseDirectory + @"\resources\configs\" + _title);
-
-            //Copies existing ini files from PCSX2
-            //looks for inis in pcsx2 directory
-            if (Directory.Exists(Properties.Settings.Default.emuDir + @"\inis\"))
-            {
-                string[] inisDir = Directory.GetFiles(Properties.Settings.Default.emuDir + @"\inis\");
-                foreach (string inifile in inisDir)
-                {
-                    Console.WriteLine(inifile + " found!");
-                    if (File.Exists(App.BaseDirectory + @"\resources\configs\" + _title + @"\" + Path.GetFileName(inifile)) == false)
+                    if (File.Exists(SpectabisFilePath.GetGameSpectabisIniFilePath(game)))
                     {
-                        string _destinationPath = Path.Combine(App.BaseDirectory + @"\resources\configs\" + _title + @"\" + Path.GetFileName(inifile));
-                        File.Copy(inifile, _destinationPath);
+                        //Sets _gameName to name of the folder
+                        string _gameName = game.Remove(0, game.LastIndexOf(Path.DirectorySeparatorChar) + 1);
+
+                        Games.Add(new LibraryGameViewModel(_gameName, this));
+                        NoGameVisibility = Visibility.Collapsed;
                     }
                 }
             }
             else
-            {
-                Console.WriteLine($"{Properties.Settings.Default.emuDir}\\inis\\ not found!");
-                Console.WriteLine("Trying " + Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\PCSX2\inis");
-
-                //looks for pcsx2 inis in documents folder
-                if (Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\PCSX2\inis"))
-                {
-                    string[] inisDirDoc = Directory.GetFiles((Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\PCSX2\inis"));
-                    foreach (string inifile in inisDirDoc)
-                    {
-                        if (File.Exists(App.BaseDirectory + @"\resources\configs\" + _title + @"\" + Path.GetFileName(inifile)) == false)
-                        {
-                            string _destinationPath = Path.Combine(App.BaseDirectory + @"\resources\configs\" + _title + @"\" + Path.GetFileName(inifile));
-                            File.Copy(inifile, _destinationPath);
-                        }
-                    }
-                }
-
-                //if no inis are found, warning is shown
-                else
-                {
-                    Console.WriteLine("Cannot find default PCSX2 configuration");
-                    mainWindow.PushSnackbar("Cannot find default PCSX2 configuration");
-                }
-
-            }
-
-            //Create a blank Spectabis.ini file
-            var gameIni = new IniFile(App.BaseDirectory + @"\resources\configs\" + _title + @"\spectabis.ini");
-            gameIni.Write("isoDirectory", _isoDir, "Spectabis");
-            gameIni.Write("nogui", "1", "Spectabis");
-            gameIni.Write("fullscreen", "1", "Spectabis");
-            gameIni.Write("fullboot", "1", "Spectabis");
-            gameIni.Write("nohacks", "1", "Spectabis");
-
-            //Copy tempart from resources and filestream it to game profile
-            Properties.Resources.tempArt.Save(App.BaseDirectory + @"\resources\_temp\art.jpg");
-
-            try
-            {
-                File.Copy(App.BaseDirectory + @"\resources\_temp\art.jpg", App.BaseDirectory + @"\resources\configs\" + _title + @"\art.jpg", true);
-            }
-            catch
-            {
-                Console.WriteLine("Failed to copy temporal art file...");
-            }
-            finally
-            {
-                //If game boxart location is null, then try scrapping
-                if (_img == null)
-                {
-                    //Add game title to automatic scrapping tasklist
-                    if (Properties.Settings.Default.autoBoxart == true)
-                    {
-                        Console.WriteLine("Adding " + _title + " to taskQueue!");
-                    }
-                }
-
-                //Add game to gamePanel
-                Games.Add(new LibraryGameViewModel(_title, this));
+			{
+                Directory.CreateDirectory(SpectabisFilePath.ConfigDirectoryPath);
             }
         }
 
@@ -566,7 +469,7 @@ namespace Spectabis_WPF.ViewModels
 
             if (DialogResult.Value == true)
             {
-                Properties.Settings.Default.gameDirectory = DirectoryDialog.SelectedPath;
+                Properties.Settings.Default.GameDirectory = DirectoryDialog.SelectedPath;
                 Properties.Settings.Default.Save();
                 ReloadGames();
 
@@ -574,7 +477,7 @@ namespace Spectabis_WPF.ViewModels
             }
             else
             {
-                Properties.Settings.Default.gameDirectory = null;
+                Properties.Settings.Default.GameDirectory = null;
                 Properties.Settings.Default.Save();
                 mainWindow.PushSnackbar("Game directory folder has been removed!");
             }

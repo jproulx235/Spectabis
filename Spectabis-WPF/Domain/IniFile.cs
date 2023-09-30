@@ -9,7 +9,7 @@ namespace Spectabis_WPF
     //Cheers! https://stackoverflow.com/users/1563422/danny-beckett
     // https://stackoverflow.com/questions/217902/reading-writing-an-ini-file
 
-    class IniFile
+    public class IniFile
     {
         string Path;
         string EXE = Assembly.GetExecutingAssembly().GetName().Name;

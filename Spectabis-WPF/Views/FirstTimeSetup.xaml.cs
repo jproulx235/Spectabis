@@ -42,7 +42,7 @@ namespace Spectabis_WPF.Views
                         return;
                     }
 
-                    Properties.Settings.Default.emuDir = _result;
+                    Properties.Settings.Default.EmuExePath = _result;
 
                     BigLogo.Visibility = Visibility.Collapsed;
                     DownloadLabel.Visibility = Visibility.Collapsed;
