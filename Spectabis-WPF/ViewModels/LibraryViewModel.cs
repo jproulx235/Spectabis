@@ -19,7 +19,7 @@ namespace Spectabis_WPF.ViewModels
 {
 	public class LibraryViewModel : INotifyPropertyChanged
 	{
-        private MainWindow mainWindow;
+        private MainWindowViewModel mainWindow;
         private List<string> LoadedISOs = new List<string>();
         private List<LibraryGameViewModel> games;
         private PackIconKind controllerIcon;
@@ -156,7 +156,7 @@ namespace Spectabis_WPF.ViewModels
                 if (_addGameCommand == null)
                 {
                     _addGameCommand = new DelegateCommand(
-                        param => mainWindow.Open_AddGame()
+                        param => mainWindow.OpenAddGame()
                     );
                 }
                 return _addGameCommand;
@@ -195,11 +195,11 @@ namespace Spectabis_WPF.ViewModels
             }
         }
 
-        public LibraryViewModel()
+        public LibraryViewModel(MainWindowViewModel mainWindow)
 		{
             Console.WriteLine("Opening Library...");
 
-            mainWindow = Application.Current.MainWindow as MainWindow;
+            this.mainWindow = mainWindow;
 
             //Hide searchbar
             if (Properties.Settings.Default.Searchbar == false)
@@ -224,8 +224,6 @@ namespace Spectabis_WPF.ViewModels
             NoGameVisibility = Visibility.Visible;
 
             ReloadGames();
-
-            
         }
 
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -263,7 +261,7 @@ namespace Spectabis_WPF.ViewModels
                 //If game directory doesn't exist, stop and remove it from variable
                 if (Directory.Exists(Properties.Settings.Default.GameDirectory) == false)
                 {
-                    mainWindow.PushSnackbar("Game Directory doesn't exist anymore!");
+                    //mainWindow.PushSnackbar("Game Directory doesn't exist anymore!");
                     Properties.Settings.Default.GameDirectory = null;
                     Properties.Settings.Default.Save();
                 }
@@ -282,7 +280,7 @@ namespace Spectabis_WPF.ViewModels
                 catch (Exception)
                 {
                     Console.WriteLine($"Failed to enumerate game directory - '{Properties.Settings.Default.GameDirectory}'");
-                    ((MainWindow)Application.Current.MainWindow).PushSnackbar("Failed to enumerate game file directory! Try selecting a different folder.");
+                    mainWindow.PushSnackbar("Failed to enumerate game file directory! Try selecting a different folder.");
                     return;
                 }
 
@@ -477,9 +475,9 @@ namespace Spectabis_WPF.ViewModels
             }
             else
             {
-                Properties.Settings.Default.GameDirectory = null;
-                Properties.Settings.Default.Save();
-                mainWindow.PushSnackbar("Game directory folder has been removed!");
+                //Properties.Settings.Default.GameDirectory = null;
+                //Properties.Settings.Default.Save();
+                //mainWindow.PushSnackbar("Game directory folder has been removed!");
             }
 
             ClearBlacklist();

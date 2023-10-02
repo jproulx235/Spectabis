@@ -41,11 +41,10 @@
 
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,50" Grid.Column="1" Orientation="Horizontal">
                 <TextBlock FontFamily="Roboto Light" FontSize="34" Foreground="Gray">Game added!</TextBlock>
-                <Button Style="{DynamicResource MaterialDesignFloatingActionLightButton}" Margin="15,0" Width="30" Height="30" ToolTip="Delete Game" Click="Delete_Click">
-                    <materialDesign:PackIcon Kind="Delete" />
-                </Button>
-                
-            </StackPanel>
+				<Button Style="{DynamicResource MaterialDesignFloatingActionLightButton}" Margin="15,0" Width="30" Height="30" ToolTip="Delete Game" Click="Delete_Click">
+					<materialDesign:PackIcon Kind="Delete" />
+				</Button>
+			</StackPanel>
         </Grid>
         
         <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">

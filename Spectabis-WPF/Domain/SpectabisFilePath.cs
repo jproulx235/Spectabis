@@ -9,7 +9,9 @@ namespace Spectabis_WPF.Domain
 {
 	public static class SpectabisFilePath
 	{
-		public static string ConfigDirectoryPath => Path.Combine(App.BaseDirectory, @"resources\configs");
+		public static string ResourcesDirectoryPath => Path.Combine(App.BaseDirectory, "resources");
+		public static string ConfigDirectoryPath => Path.Combine(ResourcesDirectoryPath, "configs");
+		public static string TempDirectoryPath => Path.Combine(ResourcesDirectoryPath, "_temp");
 		public static string InisDirectoryPath => Path.Combine(App.BaseDirectory, "inis");
 		public static string GsdxIniFilePath => Path.Combine(InisDirectoryPath, "GHSdx.ini");
 		public static string Spu2xIniFilePath => Path.Combine(InisDirectoryPath, "SPU2-X.ini");
@@ -75,20 +77,11 @@ namespace Spectabis_WPF.Domain
 
 		public static string DefaultConfigDirectoryPath => Path.Combine(App.BaseDirectory, "resources", "default_config");
 
-		public static string GetDefaultLilyPadSettingsIniFilePath()
-		{
-			return Path.Combine(DefaultConfigDirectoryPath, "LilyPad.ini");
-		}
+		public static string DefaultLilyPadSettingsIniFilePath => Path.Combine(DefaultConfigDirectoryPath, "LilyPad.ini");
 
-		public static string GetDefaultUiSettingsIniFilePath()
-		{
-			return Path.Combine(DefaultConfigDirectoryPath, "PCSX2_ui.ini");
-		}
+		public static string DefaultUiSettingsIniFilePath => Path.Combine(DefaultConfigDirectoryPath, "PCSX2_ui.ini");
 
-		public static string GetDefaultVmSettingsIniFilePath()
-		{
-			return Path.Combine(DefaultConfigDirectoryPath, "PCSX2_vm.ini");
-		}
+		public static string DefaultVmSettingsIniFilePath => Path.Combine(DefaultConfigDirectoryPath, "PCSX2_vm.ini");
 
 
 		public static string EmulatorGSdxfxFilePath => Path.Combine(Properties.Settings.Default.EmuDir, "shaders", "GSdx.fx");

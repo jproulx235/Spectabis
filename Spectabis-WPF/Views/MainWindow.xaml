@@ -49,51 +49,55 @@
             <DockPanel Grid.ColumnSpan="2">
                 <materialDesign:ColorZone Padding="16" Mode="PrimaryMid" DockPanel.Dock="Left" Height="75">
                     <DockPanel>
-                        <ToggleButton Focusable="False" Style="{StaticResource MaterialDesignHamburgerToggleButton}"  IsChecked="False" x:Name="MenuToggleButton" Checked="MenuToggleButton_Checked" Unchecked="MenuToggleButton_Unchecked"/>
+                        <ToggleButton Focusable="False" Style="{StaticResource MaterialDesignHamburgerToggleButton}"  IsChecked="{Binding Path=MenuOpen}" x:Name="MenuToggleButton"/>
 
-                        <TextBlock Name="MainWindow_Header" Margin="35,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" FontFamily="Roboto Thin" FontSize="26" Text="Library"/>
+						<TextBlock Name="MainWindow_Header" Text="{Binding Path=Header}" Margin="35,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" FontFamily="Roboto Thin" FontSize="26"/>
                     </DockPanel>
                 </materialDesign:ColorZone>
             </DockPanel>
-            <Frame x:Name="mainFrame" Focusable="False" Margin="1,75,1,1" Grid.ColumnSpan="2" NavigationUIVisibility="Hidden"/>
-            <Rectangle x:Name="overlay" Focusable="False" Fill="Gray" Margin="0,75,0,0" Grid.ColumnSpan="2" Opacity="0" IsEnabled="False" IsHitTestVisible="False" />
-            <Menu x:Name="sideMenu" Visibility="Collapsed" HorizontalAlignment="Left" Margin="0,75,0,0" Width="250" MinWidth="250" MaxWidth="250">
-				<MenuItem Name="Menu_Library" Header="Library" Width="250" Click="Menu_Library_Click">
+            
+			<Frame x:Name="mainFrame" Content="{Binding Path=CurrentPage}" Focusable="False" Margin="1,75,1,1" Grid.ColumnSpan="2" NavigationUIVisibility="Hidden"/>
+            
+			<Border x:Name="overlay" Visibility="{Binding Path=OverlayVisibility}" Focusable="False" Background="Gray" Margin="0,75,0,0" Grid.ColumnSpan="2" Opacity="0.5" IsEnabled="False" IsHitTestVisible="False" />
+            
+			<Menu x:Name="sideMenu" Visibility="{Binding Path=MenuVisibility}" HorizontalAlignment="Left" Margin="0,75,0,0" Width="250" MinWidth="250" MaxWidth="250">
+				<MenuItem Name="Menu_Library" Header="Library" Width="250" Command="{Binding Path=MenuLibraryCommand}">
 					<MenuItem.Icon>
 						<fa:ImageAwesome Icon="Solid_Book" PrimaryColor="White"/>
 					</MenuItem.Icon>
 				</MenuItem>
-				<MenuItem Name="Menu_Settings" Header="Settings" Width="250" Click="Menu_Settings_Click">
+				<MenuItem Name="Menu_Settings" Header="Settings" Width="250" Command="{Binding Path=MenuSettingsCommand}">
 					<MenuItem.Icon>
 						<fa:ImageAwesome Icon="Solid_Sliders" PrimaryColor="White"/>
 					</MenuItem.Icon>
 				</MenuItem>
-				<MenuItem Name="Menu_Appearance" Header="Appearance" Width="250" Click="Menu_Themes_Click" >
+				<MenuItem Name="Menu_Appearance" Header="Appearance" Width="250" Command="{Binding Path=MenuAppearanceCommand}">
 					<MenuItem.Icon>
 						<fa:ImageAwesome Icon="Solid_Paintbrush" PrimaryColor="White"/>
 					</MenuItem.Icon>
 				</MenuItem>
-				<MenuItem Name="Menu_Credits" Header="Credits" Width="250" Click="Menu_Credits_Click">
+				<MenuItem Name="Menu_Credits" Header="Credits" Width="250" Command="{Binding Path=MenuCreditsCommand}">
 					<MenuItem.Icon>
 						<fa:ImageAwesome Icon="Solid_CircleInfo" PrimaryColor="White"/>
 					</MenuItem.Icon>
 				</MenuItem>
             </Menu>
-            <Grid Visibility="Collapsed" x:Name="GameSettings" HorizontalAlignment="Right" Margin="0,0,0,0" Grid.Column="1" Width="700">
-				<local:GameSettings x:Name="GameSettingsPanel"/>
+            <Grid Visibility="{Binding Path=GameSettingsVisibility}" x:Name="GameSettings" HorizontalAlignment="Right" Margin="0,0,0,0" Grid.Column="1" Width="700">
+				<!--<local:GameSettings x:Name="GameSettingsPanel" DataContext="{Binding Path=GameSettings}"/>-->
+				<UserControl x:Name="GameSettingsPanel" Content="{Binding Path=GameSettings}"/>
 			</Grid>
         </Grid>
 
-        <Frame x:Name="FirstSetupFrame" Visibility="Collapsed" Margin="0,0,0,0" Source="FirstTimeSetup.xaml" />
+        <Frame x:Name="FirstSetupFrame" Visibility="{Binding Path=FirstTimeSetupVisibility}" Margin="0,0,0,0" Source="FirstTimeSetup.xaml" />
 
-        <Grid x:Name="Block" Visibility="Collapsed">
+        <Grid x:Name="Block" Visibility="{Binding Path=BlockVisibility}">
             <Rectangle Focusable="False" Fill="Gray" Margin="0,0,0,0" Opacity="0.95" />
             <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock Foreground="White" HorizontalAlignment="Center" FontFamily="Roboto Light" FontSize="20" Text="Currently running" />
-                <TextBlock Foreground="White" x:Name="RunningGame" Focusable="False" HorizontalAlignment="Center" FontFamily="Roboto Light" TextWrapping="Wrap" FontSize="72" Text="The Game Name"/>
-                <TextBlock Foreground="White" x:Name="SessionLenght" HorizontalAlignment="Center" FontFamily="Roboto Light" Text="Current Session: 0 minutes"  />
+                <TextBlock Foreground="White" x:Name="RunningGame" Focusable="False" HorizontalAlignment="Center" FontFamily="Roboto Light" TextWrapping="Wrap" FontSize="72" Text="{Binding Path=CurrentGame}"/>
+                <TextBlock Foreground="White" x:Name="SessionLenght" HorizontalAlignment="Center" FontFamily="Roboto Light" Text="{Binding Path=SessionLengthMessage}"  />
 
-                <Button Width="100" Height="35" Margin="0,15" Content="Exit" FontFamily="Roboto Light" Style="{DynamicResource MaterialDesignRaisedAccentButton}" Click="ForceStop_Click"/>
+                <Button Command="{Binding Path=ExitGameCommand}" Width="100" Height="35" Margin="0,15" Content="Exit" FontFamily="Roboto Light" Style="{DynamicResource MaterialDesignRaisedAccentButton}"/>
             </StackPanel>
         </Grid>
 
@@ -106,15 +110,14 @@
                            Text="In order to keep using Spectabis, you'll need to purchase one of our subscription plans. Until you reactivate your license, the games you've added will stay here." />
                 
                 <StackPanel Orientation="Horizontal" Margin="0,20" HorizontalAlignment="Center">
-                    <Button Width="135" Margin="15,0" Content="1 Month - 15$" Click="AprilFools_Button" />
-                    <Button Width="135"  Margin="15,0" Content="3 Months - 30$" Click="AprilFools_Button" />
-                    <Button Width="135"  Margin="15,0" Content="1 Year - $100" Click="AprilFools_Button" />
-                    <Button Width="135"  Margin="15,0" Content="Lifetime - 420$" Click="AprilFools_Button" />
+                    <Button Width="135" Margin="15,0" Content="1 Month - 15$" Command="{Binding Path=AprilFoolsCommand}" />
+					<Button Width="135"  Margin="15,0" Content="3 Months - 30$" Command="{Binding Path=AprilFoolsCommand}" />
+					<Button Width="135"  Margin="15,0" Content="1 Year - $100" Command="{Binding Path=AprilFoolsCommand}" />
+					<Button Width="135"  Margin="15,0" Content="Lifetime - 420$" Command="{Binding Path=AprilFoolsCommand}" />
                 </StackPanel>
             </StackPanel>
         </Grid>
 
-        <materialDesign:Snackbar MessageQueue="{materialDesign:MessageQueue}" x:Name="SnackBar"/>
-
-    </Grid>
+		<materialDesign:Snackbar MessageQueue="{Binding Path=SnackBarQueue}" IsActive="{Binding Path=SnackbarActive}" x:Name="SnackBar"/>
+	</Grid>
 </Controls:MetroWindow>

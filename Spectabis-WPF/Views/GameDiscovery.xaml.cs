@@ -4,6 +4,7 @@ using Spectabis_WPF.Domain;
 using System.Linq;
 using System;
 using System.Collections.Generic;
+using Spectabis_WPF.ViewModels;
 
 namespace Spectabis_WPF.Views
 {
@@ -12,11 +13,14 @@ namespace Spectabis_WPF.Views
     /// </summary>
     public partial class GameDiscovery : Page
     {
-        private List<string> GameList = new List<string>((((MainWindow)Application.Current.MainWindow).NewGamesInDirectory));
+        private List<string> GameList = new List<string>();
         private List<string> gamesToAdd = new List<string>();
+        private MainWindowViewModel mainWindow;
 
-        public GameDiscovery()
+        public GameDiscovery(List<string> games, MainWindowViewModel mainWindow)
         {
+            GameList = games;
+            this.mainWindow = mainWindow;
             InitializeComponent();
             GameListView.SelectionChanged += (sender, e) => GameListView_SelectionChanged();
             MakeData();
@@ -101,7 +105,9 @@ namespace Spectabis_WPF.Views
         {
             foreach(string game in gamesToAdd)
             {
-                GameProfile.Create(null, game, GetGameName.GetName(game));
+                GameProfile.Create(game, GetGameName.GetName(game));
+
+                ScrapeArt scraper = new ScrapeArt(game);
             }
 
             Console.WriteLine("Game profiles created!");
@@ -110,7 +116,7 @@ namespace Spectabis_WPF.Views
 
         private void Back()
         {
-            ((MainWindow)Application.Current.MainWindow).Open_Library();
+            mainWindow.OpenLibrary();
         }
     }
 }

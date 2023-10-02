@@ -1,30 +1,32 @@
-﻿using System.Windows;
-using System.Windows.Controls;
-using Spectabis_WPF.Domain;
+﻿using MahApps.Metro.Controls;
 using Ookii.Dialogs.Wpf;
-using System.IO;
-using System.Windows.Media.Animation;
+using Spectabis_WPF.Domain;
+using Spectabis_WPF.ViewModels;
 using System;
-using System.Net.Cache;
-using System.Windows.Input;
 using System.ComponentModel;
-using MahApps.Metro.Controls;
+using System.IO;
+using System.Net.Cache;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media.Animation;
 
 namespace Spectabis_WPF.Views
 {
-    /// <summary>
-    /// Interaction logic for AddGame.xaml
-    /// </summary>
-    public partial class AddGame : Page
+	/// <summary>
+	/// Interaction logic for AddGame.xaml
+	/// </summary>
+	public partial class AddGame : Page
     {
 
         private BackgroundWorker scrapingWorker = new BackgroundWorker();
+        private MainWindowViewModel mainWindow;
 
-        public AddGame()
+        public AddGame(MainWindowViewModel mainWindow)
         {
             InitializeComponent();
             PartTwo_Grid.Opacity = 0;
-
+            this.mainWindow = mainWindow;
             scrapingWorker.DoWork += scrapingWorker_DoWork;
         }
 
@@ -75,7 +77,7 @@ namespace Spectabis_WPF.Views
                 }
 
                 var file = ISODialog.FileName;
-                title = GameProfile.Create(null, file, title);
+                title = GameProfile.Create(file, title);
 
                 //Change initial button and text
                 ISOBrowser_Text.Text = $"{title} was added!";
@@ -102,7 +104,7 @@ namespace Spectabis_WPF.Views
 
         private void scrapingWorker_DoWork(object sender, EventArgs e)
         {
-            ScrapeArt scraper = new ScrapeArt(title);
+            //ScrapeArt scraper = new ScrapeArt(title);
 
             this.Invoke(() => {
                 RefreshBox();
@@ -154,8 +156,7 @@ namespace Spectabis_WPF.Views
             Console.WriteLine(Name_Textbox.Text);
             Console.WriteLine(BaseDirectory + @"\resources\configs\" + Name_Textbox.Text);
             GameProfile.Delete(Name_Textbox.Text);
-            ((MainWindow)Application.Current.MainWindow).Open_Library();
-
+            mainWindow.OpenLibrary();
         }
 
         private void CacheImage(Uri _img)

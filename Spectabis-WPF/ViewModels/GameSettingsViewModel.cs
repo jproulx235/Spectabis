@@ -11,8 +11,6 @@ using System.Linq;
 using System.Net.Cache;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
@@ -38,7 +36,7 @@ namespace Spectabis_WPF.ViewModels
 		private ICommand searchWikiCommand;
 		private ICommand changeFileCommand;
 		private List<AspectRatio> aspectRatioChoices;
-		private MainWindow mainWindow;
+		private MainWindowViewModel mainWindow;
 		private BitmapImage boxArt;
 		private ICommand closeCommand;
 		private string isoLocation;
@@ -258,39 +256,37 @@ namespace Spectabis_WPF.ViewModels
 			GameName = _name;
 
 			var config = SpectabisConfig.ReadConfig(_name);
-			nogui = config.NoGui;
-			fullscreen = config.Fullscreen;
-			fullboot = config.Fullboot;
-			disableSpeedHacks = config.NoHacks;
-			isoLocation = config.IsoPath;
-			widescreen = config.Widescreen;
-			customShaders = config.CustomShaders;
-			zoom = config.Zoom;
-			aspectratio = config.AspectRatio;
+			NoGui = config.NoGui;
+			Fullscreen = config.Fullscreen;
+			FullBoot = config.Fullboot;
+			DisableSpeedHacks = config.NoHacks;
+			IsoLocation = config.IsoPath;
+			Widescreen = config.Widescreen;
+			CustomShaders = config.CustomShaders;
+			Zoom = config.Zoom;
+			AspectRatio = config.AspectRatio;
 
-			mainWindow = Application.Current.MainWindow as MainWindow;
+			AspectRatioChoices = ((AspectRatio[])Enum.GetValues(typeof(AspectRatio))).ToList();
+
+			mainWindow = (Application.Current.MainWindow as MainWindow).DataContext as MainWindowViewModel;
 
 			//Disable Input settings button if "Global Controller Profile" is enabled
 			InputSettingsEnabled = Properties.Settings.Default.GlobalController;
 
 			//Show the panel and overlay
-			mainWindow.Overlay(true);
-			mainWindow.SlideInPanelAnimation();
+			(Application.Current.MainWindow as MainWindow).SlideInPanelAnimation();
 
 			//Creates a bitmap stream
 			var artSource = new System.Windows.Media.Imaging.BitmapImage();
-
 			artSource.BeginInit();
-
 			//Fixes the caching issues, where cached copy would just hang around and bother me for two days
 			artSource.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.None;
 			artSource.UriCachePolicy = new RequestCachePolicy(RequestCacheLevel.BypassCache);
 			artSource.CreateOptions = System.Windows.Media.Imaging.BitmapCreateOptions.IgnoreImageCache;
-
 			artSource.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
 			artSource.UriSource = new Uri(SpectabisFilePath.GetGameBoxArtFilePath(_name), UriKind.RelativeOrAbsolute);
-
 			artSource.EndInit();
+
 			BoxArt = artSource;
 		}
 
@@ -501,7 +497,7 @@ namespace Spectabis_WPF.ViewModels
 				artSource.EndInit();
 				BoxArt = artSource;
 
-				mainWindow.RefreshGameArt(GameName);
+				//mainWindow.RefreshGameArt(GameName);
 			}
 		}
 
@@ -539,14 +535,7 @@ namespace Spectabis_WPF.ViewModels
 			};
 			SpectabisConfig.SaveConfig(config);
 			
-			//Shader status - written to gsdx.ini
-			if (CustomShaders)
-			{
-				CopyShaders();
-				WriteGSdxFX();
-			}
-
-			mainWindow.SlideOutPanelAnimation();
+			(Application.Current.MainWindow as MainWindow).SlideOutPanelAnimation();
 		}
 
 		private void CopyShaders()

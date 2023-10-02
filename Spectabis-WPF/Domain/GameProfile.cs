@@ -1,5 +1,6 @@
 ﻿using Spectabis_WPF.Enums;
 using System;
+using System.ComponentModel;
 using System.IO;
 
 namespace Spectabis_WPF.Domain
@@ -32,7 +33,7 @@ namespace Spectabis_WPF.Domain
         }
 
         //Creates a game profile and returns the created title, because of indexation
-        public static string Create(string _img, string _isoDir, string _title)
+        public static string Create(string _isoDir, string _title)
         {
             //sanitize game's title for folder creation
             Console.WriteLine("Sanitizing Game Title");
@@ -105,21 +106,15 @@ namespace Spectabis_WPF.Domain
             };
 
             SpectabisConfig.SaveConfig(config);
-            
-            if(_img == null || File.Exists(_img))
-            {
-                //Copy tempart from resources
-                Properties.Resources.tempArt.Save(SpectabisFilePath.PlaceholderBoxArtFilePath);
-                File.Copy(SpectabisFilePath.PlaceholderBoxArtFilePath, SpectabisFilePath.GetGameBoxArtFilePath(_title), true);
-            }
-            else
-            {
-                File.Copy(_img, SpectabisFilePath.GetGameBoxArtFilePath(_title), true);
-            }
-            
+
+            // Copy the placeholder before downloading the real art
+            Properties.Resources.tempArt.Save(SpectabisFilePath.PlaceholderBoxArtFilePath);
+            File.Copy(SpectabisFilePath.PlaceholderBoxArtFilePath, SpectabisFilePath.GetGameBoxArtFilePath(_title), true);
+
             return _title;
-            
         }
+
+        
 
         public static void Delete(string _title)
         {

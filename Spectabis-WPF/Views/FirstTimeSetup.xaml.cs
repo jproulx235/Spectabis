@@ -92,7 +92,7 @@ namespace Spectabis_WPF.Views
             }
 
             Properties.Settings.Default.Save();
-            ((MainWindow)Application.Current.MainWindow).HideFirsttimeSetup();
+            //((MainWindow)Application.Current.MainWindow).HideFirsttimeSetup();
         }
 
         //"Get PCSX2" at bottom label

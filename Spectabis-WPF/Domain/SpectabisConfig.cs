@@ -58,27 +58,35 @@ namespace Spectabis_WPF.Domain
 			specIni.Write("isoDirectory", config.IsoPath, "Spectabis");
 
 			var vmIni = GetVmIniFile(config.GameName);
-
 			vmIni.Write("EnableWideScreenPatches", config.Widescreen.ToString(), "EmuCore");
 
 			var gsdxIni = GetGsdxIniFile(config.GameName);
-
 			gsdxIni.Write("shaderfx", config.CustomShaders.ToString(), "Settings");
 
 			if(config.CustomShaders)
 			{
+				// Copy Shaders
+				if (!File.Exists(SpectabisFilePath.GetGameGSdxfxFilePath(config.GameName)))
+				{
+					File.Copy(SpectabisFilePath.EmulatorGSdxfxFilePath, SpectabisFilePath.GetGameGSdxfxFilePath(config.GameName));
+					File.Copy(SpectabisFilePath.EmulatorGSdxfxSettingsIniFilePath, SpectabisFilePath.GetGameGSdxfxSettingsIniFilePath(config.GameName));
+				}
 
+				// Write GSdx.fx file
+				var GSdx = new IniFile(SpectabisFilePath.GetGameGSdxIniFilePath(config.GameName));
+				GSdx.Write("shaderfx_glsl", SpectabisFilePath.GetGameGSdxfxFilePath(config.GameName), "Settings");
+				GSdx.Write("shaderfx_conf", SpectabisFilePath.GetGameGSdxfxSettingsIniFilePath(config.GameName), "Settings");
+				Console.WriteLine("Shader files written to GSdx.ini");
 			}
 
 			var uiIni = GetUiIniFile(config.GameName);
-
 			uiIni.Write("Zoom", config.Zoom.ToString(), "GSWindow");
 			uiIni.Write("AspectRatio", config.AspectRatio.ToString(), "GSWindow");
 		}
 
 		private static string CreateSpectabisIniPath(string game)
 		{
-			return Path.Combine(configDir, game, "spectabis.ini");
+			return SpectabisFilePath.GetGameSpectabisIniFilePath(game);
 		}
 
 		private static IniFile GetSpectabisIniFile(string game)

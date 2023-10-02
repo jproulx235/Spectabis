@@ -1,24 +1,21 @@
-﻿using System;
+﻿using MaterialDesignThemes.Wpf;
+using SharpDX.XInput;
+using Spectabis_WPF.Domain;
+using Spectabis_WPF.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Cache;
+using System.Management;
+using System.Runtime.InteropServices;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using MahApps.Metro.Controls;
-using MaterialDesignThemes.Wpf;
-using SharpDX.XInput;
 using System.Windows.Media.Animation;
-using System.Management;
-using Spectabis_WPF.Domain;
-using System.Runtime.InteropServices;
-using Spectabis_WPF.ViewModels;
 
 namespace Spectabis_WPF.Views
 {
@@ -87,11 +84,11 @@ namespace Spectabis_WPF.Views
                     {
                         if(Properties.Settings.Default.TitleAsFile)
                         {
-                            GameProfile.Create(null, file, Path.GetFileNameWithoutExtension(file));
+                            GameProfile.Create(file, Path.GetFileNameWithoutExtension(file));
                         }
                         else
                         {
-                            GameProfile.Create(null, file, GetGameName.GetName(file));
+                            GameProfile.Create(file, GetGameName.GetName(file));
                         }
 
                         
@@ -99,7 +96,7 @@ namespace Spectabis_WPF.Views
                     else
                     {
                         ((MainWindow)Application.Current.MainWindow).PushSnackbar("This filetype doesn't support automatic boxart!");
-                        GameProfile.Create(null, file, Path.GetFileNameWithoutExtension(file));
+                        GameProfile.Create(file, Path.GetFileNameWithoutExtension(file));
                     }
                 }
                 else

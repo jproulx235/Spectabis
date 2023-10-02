@@ -23,6 +23,7 @@ namespace Spectabis_WPF.ViewModels
 	{
 		private string gameConfigs = App.BaseDirectory + @"\resources\configs\";
 
+		private MainWindowViewModel mainWindow => ((MainWindow)Application.Current.MainWindow).DataContext as MainWindowViewModel;
 		private LibraryViewModel library;
 		private string gameName;
 		private BitmapImage boxArt;
@@ -240,7 +241,7 @@ namespace Spectabis_WPF.ViewModels
 			Application.Current.Dispatcher.Invoke(new Action(() => ((MainWindow)Application.Current.MainWindow).MainWindow_Minimize()));
 
 			//Set running game text
-			Application.Current.Dispatcher.Invoke(new Action(() => ((MainWindow)Application.Current.MainWindow).SetRunningGame(GameName)));
+			Application.Current.Dispatcher.Invoke(new Action(() => mainWindow.CurrentGame = GameName));
 
 			BlockInput(true);
 		}
@@ -254,7 +255,7 @@ namespace Spectabis_WPF.ViewModels
 
 		private void BlockInput(bool e)
 		{
-			Application.Current.Dispatcher.Invoke(new Action(() => ((MainWindow)Application.Current.MainWindow).BlockInput(e)));
+			Application.Current.Dispatcher.Invoke(new Action(() => mainWindow.BlockInput(e)));
 		}
 
 		private void PCSX2ConfigureGame()
@@ -267,7 +268,7 @@ namespace Spectabis_WPF.ViewModels
 		private void SpectabisConfig()
 		{
 			//Title of the last clicked game
-			((MainWindow)Application.Current.MainWindow).Open_Settings(true, GameName);
+			mainWindow.OpenGameSettings(GameName);
 		}
 
 		private void RemoveGame()
